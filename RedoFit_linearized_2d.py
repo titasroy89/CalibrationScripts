@@ -149,7 +149,7 @@ def QIECalibrationScan(options):
 
 
         outputParamFile = open(outputDirectory+"calibrationParams.txt",'w')
-        outputParamFile.write('(qieID, serialNum, qieNum, capID, qieRange,shuntMult, outputDirectory, timeStamp, slope, offset)\n')
+        outputParamFile.write('(qieID, serialNum, qieNum, capID, qieRange,shuntMult, outputDirectory, timeStamp, slope, offset,uncertainty)\n')
 
         uID_list = []
         for link in linkMap:
@@ -178,9 +178,9 @@ def QIECalibrationScan(options):
                  cursor[uID].execute("drop table if exists qieparams")
                  cursor[uID].execute("drop table if exists qieshuntparams")
                  cursor[uID].execute("drop table if exists qietdcparams")
-                 cursor[uID].execute("create table if not exists qieparams(id STRING, serial INT, qie INT, capID INT, range INT, directoryname STRING, date STRING, slope REAL, offset REAL)")
+                 cursor[uID].execute("create table if not exists qieparams(id STRING, serial INT, qie INT, capID INT, range INT, directoryname STRING, date STRING, slope REAL, offset REAL, uncertainty REAL)")
  
-                 cursor[uID].execute("create table if not exists qieshuntparams(id STRING, serial INT, qie INT, capID INT, range INT, shunt INT, directoryname STRING, date STRING    , slope REAL, offset REAL)")
+                 cursor[uID].execute("create table if not exists qieshuntparams(id STRING, serial INT, qie INT, capID INT, range INT, shunt INT, directoryname STRING, date STRING    , slope REAL, offset REAL, uncertainty REAL)")
 
                  cursor[uID].execute("create table if not exists qietdcparams(id STRING, qie INT, tdcstart REAL)")
 
@@ -188,7 +188,7 @@ def QIECalibrationScan(options):
 
         ### Graph parameters
         outputParamFile_shunt = open(outputDirectory+"calibrationParams_shunt.txt",'w')
-        outputParamFile_shunt.write('(qieID, serialNum, qieNum, capID, qieRange, shuntMult,outputDirectory, timeStamp, slope, offset)\n') 
+        outputParamFile_shunt.write('(qieID, serialNum, qieNum, capID, qieRange, shuntMult,outputDirectory, timeStamp, slope, offset, uncertainty)\n') 
         
         if options.RunShunt:
                 print " Shunt Scans begin"
@@ -212,12 +212,12 @@ def QIECalibrationScan(options):
                 if shuntMult == 1:
 			qieRange= range(4)
                 else:
-			qieRange=range(3)
+			qieRange=range(2)
 
-                for i_range in range(3):
+                for i_range in qieRange:
 			histoList =  vals[i_range].keys()
 			histoList.sort()
-
+            #print "now",histoList
 			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
                    #    print "Now printing out put from adcTofC"            
                         #print graphs_shunt
@@ -257,8 +257,8 @@ def QIECalibrationScan(options):
 			for i_range in graphs_shunt:
 				for i_capID in range(4):
 					print shuntMult, i_range, i_capID
-					values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], params_shunt[i_range][i_capID][1])
-					cursor[uID].execute("insert into qieshuntparams values (?, ?, ?, ?, ?, ?, ?, ?, ? , ?)",values_shunt)
+					values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], params_shunt[i_range][i_capID][1],params_shunt[i_range][i_capID][2])
+					cursor[uID].execute("insert into qieshuntparams values (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)",values_shunt)
 					# print values_shunt
 					outputParamFile_shunt.write(str(values_shunt)+'\n')
          

@@ -25,7 +25,7 @@ nominalMapping = { 1 : 4,
 
 def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
 
-    conSlopes = lite.connect("../InjectionBoardCalibration/TestSlopesOffsets.db")
+    conSlopes = lite.connect("../InjectionBoardCalibration/TestSlopesOffsets_final.db")
    
 
     print 'Making TGraphs from histos'
@@ -37,7 +37,7 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
     if shuntMult == 1:
             qierange = range(4)
     else :
-            qierange = range(3)
+            qierange = range(2)
     #print "Going over ranges ",qierange
     #for i_range in qierange:
     if i_range > 0 or shuntMult>1:
@@ -46,7 +46,7 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
         highCurrent = False
     print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
     #print values
-    lsbList = values[0].keys()
+    lsbList = values[96].keys()
     lsbList.sort()
 #    print "dac values for this combination",lsbList
     #print histo_list
@@ -55,7 +55,7 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
         #    print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
 
             channel = (ih % 12 + 1)
-
+            print "ih",ih
             linkNum = int(ih/6)
 
             backplane_slotNum = linkMap[linkNum]['slot']

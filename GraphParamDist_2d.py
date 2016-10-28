@@ -34,18 +34,21 @@ def graphParamDist(paramFileName):
         parameterValues = cursor.execute("select * from qieshuntparams where id = ?", [str(uniqueID)]).fetchall()
         for shuntMult in shuntMultList:
 
-            range0MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),0,shuntMult]).fetchone()
-            range1MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),1,shuntMult]).fetchone()
-            range2MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),2,shuntMult]).fetchone()
-            range3MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),3,shuntMult]).fetchone()
+            range0MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),0,shuntMult]).fetchone()
+            range1MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),1,shuntMult]).fetchone()
+            range2MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),2,shuntMult]).fetchone()
+            range3MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),3,shuntMult]).fetchone()
 
-            if shuntMult>1: range3MinMax = [1,1,1,1]
+            if shuntMult>1: 
+                range3MinMax= [1,1,1,1] 
+                range2MinMax= [1,1,1,1] 
+                #range1MinMax= [1,1,1,1]
             
 
-            hists[shuntMult] = {0:[TH1F("Range0Slopes_shunt%.1f"%shuntMult,"Range0Slopes_shunt%.1f"%shuntMult,50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets_shunt%.1f"%shuntMult,"Range0Offsets_shunt%.1f"%shuntMult,50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-                                1:[TH1F("Range1Slopes_shunt%.1f"%shuntMult,"Range1Slopes_shunt%.1f"%shuntMult,50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets_shunt%.1f"%shuntMult,"Range1Offsets_shunt%.1f"%shuntMult,50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-                                2:[TH1F("Range2Slopes_shunt%.1f"%shuntMult,"Range2Slopes_shunt%.1f"%shuntMult,50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets_shunt%.1f"%shuntMult,"Range2Offsets_shunt%.1f"%shuntMult,50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-                                3:[TH1F("Range3Slopes_shunt%.1f"%shuntMult,"Range3Slopes_shunt%.1f"%shuntMult,50,range3MinMax[0]*0.8,range3MinMax[1]*1.2), TH1F("Range3Offsets_shunt%.1f"%shuntMult,"Range3Offsets_shunt%.1f"%shuntMult,50,range3MinMax[2]*1.2, range3MinMax[3]*1.2)],
+            hists[shuntMult] = {0:[TH1F("Range0Slopes_shunt%.1f"%shuntMult,"Range0Slopes_shunt%.1f"%shuntMult,50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets_shunt%.1f"%shuntMult,"Range0Offsets_shunt%.1f"%shuntMult,50,range0MinMax[2]*1.2, range0MinMax[3]*1.2), TH1F("Range0Uncertainties_shunt%.1f"%shuntMult,"Range0Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+                                1:[TH1F("Range1Slopes_shunt%.1f"%shuntMult,"Range1Slopes_shunt%.1f"%shuntMult,50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets_shunt%.1f"%shuntMult,"Range1Offsets_shunt%.1f"%shuntMult,50,range1MinMax[2]*1.2, range1MinMax[3]*1.2),TH1F("Range1Uncertainties_shunt%.1f"%shuntMult,"Range1Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+                                2:[TH1F("Range2Slopes_shunt%.1f"%shuntMult,"Range2Slopes_shunt%.1f"%shuntMult,50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets_shunt%.1f"%shuntMult,"Range2Offsets_shunt%.1f"%shuntMult,50,range2MinMax[2]*1.2, range2MinMax[3]*1.2), TH1F("Range2Uncertainties_shunt%.1f"%shuntMult,"Range2Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+                                3:[TH1F("Range3Slopes_shunt%.1f"%shuntMult,"Range3Slopes_shunt%.1f"%shuntMult,50,range3MinMax[0]*0.8,range3MinMax[1]*1.2), TH1F("Range3Offsets_shunt%.1f"%shuntMult,"Range3Offsets_shunt%.1f"%shuntMult,50,range3MinMax[2]*1.2, range3MinMax[3]*1.2), TH1F("Range3Uncertainties_shunt%.1f"%shuntMult,"Range3Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
                      }
             # if shuntMult == 1:
             #     hists_1 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
@@ -116,10 +119,11 @@ def graphParamDist(paramFileName):
             #                     }
 
         for entry in parameterValues:
-            qieID, serial, qieNum, i_capID, qieRange,shuntMult, directory, timestamp, slope, offset = entry
+            qieID, serial, qieNum, i_capID, qieRange,shuntMult, directory, timestamp, slope, offset, uncertainty = entry
                      
             hists[shuntMult][qieRange][0].Fill(slope)
             hists[shuntMult][qieRange][1].Fill(offset)
+            hists[shuntMult][qieRange][2].Fill(uncertainty)
                 
 
         outputParamRootFile = TFile("%s/fitResults_%s.root"%(outputDirectory, uniqueID.replace(" ","_")),"update")
@@ -130,6 +134,7 @@ def graphParamDist(paramFileName):
             for i_range in hists[shuntMult]:
                 hists[shuntMult][i_range][0].Write()
                 hists[shuntMult][i_range][1].Write()
+                hists[shuntMult][i_range][2].Write()
                 
 # # print hists                                                                                                                       
 #             for i_range in hists:

@@ -305,7 +305,8 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                 for icapID in range(4):
                         offset = fitLines[irange][icapID].GetParameter(0)
                         slope = fitLines[irange][icapID].GetParameter(1)
-                        params[irange].append([slope,offset])
+                        uncertainty = fitLines[irange][icapID].GetParError(1)
+                        params[irange].append([slope,offset,uncertainty])
 
 
 
