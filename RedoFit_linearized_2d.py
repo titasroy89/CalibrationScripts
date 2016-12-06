@@ -12,7 +12,7 @@ from DAC import *
 
 #from scans import *
 # from adcTofC import *
-from fitGraphs_linearized import *
+from fitGraphs_linearized_2d import *
 from adcTofC_linearized_2d import *
 #from fitGraphs_linearized_2d import *
 
@@ -92,6 +92,7 @@ def getValuesFromFile(outputDir):
 
         dataFile = open(outputDir+"/cardData.txt",'r')
         for line in dataFile:
+
                 if 'DAC' in line and 'Used' in line:
                         dacNumber = line.split()[1]
                 if 'linkMap' in line:
@@ -102,8 +103,17 @@ def getValuesFromFile(outputDir):
                 
 
 def ShuntScan(shuntMult=1, outputDirectory = '', ):
-         
-         final_file = outputDirectory+'QIECalibration_1.root'
+         files = os.listdir(outputDirectory)
+	 final_file = ''
+	 for f in files:
+	 	if 'QIECalibration_' in f:
+			final_file = outputDirectory+f
+	 if final_file=='':
+		print 'Unable to find data file in directory %s'%outputDirectory
+		print 'Exiting'
+		sys.exit()
+	 
+         #final_file = outputDirectory+'QIECalibration_1.root'
          val= read_histo_2d(file_in=final_file,shuntMult=shuntMult)
 
          return val

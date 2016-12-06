@@ -8,10 +8,10 @@ from linearADC import *
 
 ####Change the fit to return slopes/offsets in terms of range 0 values for all ranges
 
-gROOT.SetBatch(kTRUE)
-ROOT.gStyle.SetCanvasColor(kWhite)
-gStyle.SetStatStyle(kWhite)
-gStyle.SetTitleStyle(kWhite)
+#gROOT.SetBatch(kTRUE)
+#ROOT.gStyle.SetCanvasColor(kWhite)
+#gStyle.SetStatStyle(kWhite)
+#gStyle.SetTitleStyle(kWhite)
 
 graphOffset = [100,500,3000,8000]
 

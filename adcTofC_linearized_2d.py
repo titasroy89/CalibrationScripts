@@ -25,7 +25,7 @@ nominalMapping = { 1 : 4,
 
 def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
 
-    conSlopes = lite.connect("../InjectionBoardCalibration/TestSlopesOffsets_final.db")
+    conSlopes = lite.connect("../InjectionBoardCalibration/SlopesOffsets_final.db")
    
 
     print 'Making TGraphs from histos'
@@ -73,9 +73,11 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
             for i_lsb in lsbList:
         
                 if i_lsb> 48000: continue
-                query = ( channel, injectioncard, int(dac), int(highCurrent), i_lsb, i_lsb)
-                cur_Slopes.execute('SELECT offset, slope FROM CARDCAL WHERE channel=? AND card=? AND dac=? AND highcurrent=? AND rangehigh>=? AND rangelow<=?', query )
+                query = ( injectioncard, int(dac), channel, int(highCurrent), i_lsb, i_lsb)
+                cur_Slopes.execute('SELECT offset, slope FROM CARDCAL WHERE card=? AND dac=? AND channel=? AND highcurrent=? AND rangelow<=? AND rangehigh>=?', query )
                 result_t = cur_Slopes.fetchone()
+		#print query
+		#print result_t
                 offset = result_t[0]
                 slope = result_t[1]
 
