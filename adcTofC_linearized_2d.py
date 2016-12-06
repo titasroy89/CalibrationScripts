@@ -25,7 +25,7 @@ nominalMapping = { 1 : 4,
 
 def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
 
-    conSlopes = lite.connect("../InjectionBoardCalibration/SlopesOffsets_final.db")
+    conSlopes = lite.connect("SlopesOffsets_final.db")
    
 
     print 'Making TGraphs from histos'
