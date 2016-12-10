@@ -39,8 +39,9 @@ shunt_Val ={1:0,
             7:20,
             8:24,
             9:26,
-           10:28,                                                                                                                                                                                11:30,
-           11.5:31}
+	    10:28,
+	    11:30,
+	    11.5:31}
 
 
 
@@ -93,7 +94,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 #                       nominalgraph.Write()
                         if i_range==0:
                                 for n in range(graph.GetN()):
-                                        if graph.GetX()[n]>0.5:
+                                        if graph.GetX()[n]>2:
                                                 x1 = graph.GetX()[n+1]
                                                 y1 = graph.GetY()[n+1]
                                                 x2 = graph.GetX()[n+2]

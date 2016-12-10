@@ -45,11 +45,12 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
     else:
         highCurrent = False
     print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
+    print highCurrent
     #print values
-    lsbList = values[96].keys()
+    lsbList = values[histo_list[0]].keys()
     lsbList.sort()
 #    print "dac values for this combination",lsbList
-    #print histo_list
+    print histo_list
     for ih in histo_list:
             QIE_values = []
         #    print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
@@ -76,16 +77,14 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
                 query = ( injectioncard, int(dac), channel, int(highCurrent), i_lsb, i_lsb)
                 cur_Slopes.execute('SELECT offset, slope FROM CARDCAL WHERE card=? AND dac=? AND channel=? AND highcurrent=? AND rangelow<=? AND rangehigh>=?', query )
                 result_t = cur_Slopes.fetchone()
-		#print query
-		#print result_t
+
                 offset = result_t[0]
                 slope = result_t[1]
-
+                
 
                 current = i_lsb*slope + offset
                 charge = current*25e6
-
-            
+                
                 mean_ = []
                 rms_ = []
                 for i_capID in range(4):
@@ -93,37 +92,33 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
                     #print values[ih][i_lsb]['mean'][i_capID]
                     mean_.append(values[ih][i_lsb]['mean'][i_capID])
                     rms_.append(values[ih][i_lsb]['rms'][i_capID])
-                    QIE_values.append([i_lsb,-1*charge,mean_,rms_])
+                QIE_values.append([i_lsb,-1*charge,mean_,rms_])
 
-                QIE_values.sort()
-                #print QIE_values
-                #print "ih is %i and range is %i"%(ih,i_range)
-               # graphs={}
-                graphs[ih] = []
-                #ADCvsfC = []
-       # for i in QIE_values:
-        #    print i[3][3]
-        
-        #sys.exit()
-                for i_capID in range(4):
-                    adcerr_array_new = array('d')
-                    fc_array_div = array('d')
-                    fc_array = array('d',[b[1] for b in QIE_values])
-                    for i in fc_array:
-                        fc_array_div.append(i/shuntMult)
-                    #fc_array = array('d',[b[2] for b in QIE_values])
-                    fCerror_array = array('d',[0]*len(fc_array))
-                    adc_array = array('d',[b[2][i_capID] for b in QIE_values])
-                    #adc_array = array('d',[b[3][i_capID] for b in QIE_values])
-                    adcerr_array = array('d',[b[3][i_capID] for b in QIE_values])
-                    myInt = 84.
-                    for i in adcerr_array:
-                        adcerr_array_new.append(i/myInt)
+            QIE_values.sort()
+            #print QIE_values
+            #print "ih is %i and range is %i"%(ih,i_range)
+            # graphs={}
+            graphs[ih] = []
+            #ADCvsfC = []
+            for i_capID in range(4):
+                adcerr_array_new = array('d')
+                fc_array_div = array('d')
+                fc_array = array('d',[b[1] for b in QIE_values])
+                for i in fc_array:
+                    fc_array_div.append(i/shuntMult)
+                #fc_array = array('d',[b[2] for b in QIE_values])
+                fCerror_array = array('d',[0]*len(fc_array))
+                adc_array = array('d',[b[2][i_capID] for b in QIE_values])
+                #adc_array = array('d',[b[3][i_capID] for b in QIE_values])
+                adcerr_array = array('d',[b[3][i_capID] for b in QIE_values])
+                myInt = 84.
+                for i in adcerr_array:
+                    adcerr_array_new.append(i/myInt)
                     
-                    ADCvsfC=TGraphErrors(len(fc_array),adc_array,fc_array,adcerr_array_new,fCerror_array)
-                    ADCvsfC.SetNameTitle("ADCvsfC_%i_range_%i_shunt_%.1f_capID_%i"%(ih,i_range,shuntMult,i_capID),"ADCvsfC_%i_range_%i_shunt_%.1f_capID_%i"%(ih,i_range,shuntMult,i_capID))
+                ADCvsfC=TGraphErrors(len(fc_array),adc_array,fc_array,adcerr_array_new,fCerror_array)
+                ADCvsfC.SetNameTitle("ADCvsfC_%i_range_%i_shunt_%.1f_capID_%i"%(ih,i_range,shuntMult,i_capID),"ADCvsfC_%i_range_%i_shunt_%.1f_capID_%i"%(ih,i_range,shuntMult,i_capID))
 
-                    graphs[ih].append(ADCvsfC)
+                graphs[ih].append(ADCvsfC)
          
    #                graphs_2[i_range]=graphs[ih]
     return graphs
