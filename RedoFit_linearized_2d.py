@@ -211,7 +211,11 @@ def QIECalibrationScan(options):
                 shuntMult_list = [shuntMult_list]
         shuntMult_list.sort()
 
+
+	pedestalVals = {}
+
         print"I am here"
+
         for shuntMult in shuntMult_list:
                 graphs_shunt ={}
                 output={}
@@ -239,7 +243,7 @@ def QIECalibrationScan(options):
                     #injectionMapping[simpleCardMap[int(ih/12)]]['id']
 			serial = 699999
 
-			qieNum =ih%24 + 1
+			qieNum =ih%12 + 1
 			graphList_shunt=[]
                     #if 1 in graphs_shunt:
 
@@ -260,7 +264,7 @@ def QIECalibrationScan(options):
 			else:
 				graphList_shunt.append(None)
 
-			params_shunt =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult)
+			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestal = pedestalVals)
 			print params_shunt
 			uID = qieID.replace(' ', '_')
 

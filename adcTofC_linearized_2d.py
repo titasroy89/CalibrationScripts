@@ -116,7 +116,8 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
                     adcerr_array_new.append(i/myInt)
                     
                 ADCvsfC=TGraphErrors(len(fc_array),adc_array,fc_array,adcerr_array_new,fCerror_array)
-                ADCvsfC.SetNameTitle("ADCvsfC_%i_range_%i_shunt_%.1f_capID_%i"%(ih,i_range,shuntMult,i_capID),"ADCvsfC_%i_range_%i_shunt_%.1f_capID_%i"%(ih,i_range,shuntMult,i_capID))
+                ### Change the name, removing the decimal from the shuntmult (replacing it separated with an underscore) to make it openable in root command line
+                ADCvsfC.SetNameTitle("ADCvsfC_%i_range_%i_shunt_%i_%i_capID_%i"%(ih,i_range,int(shuntMult),int(shuntMult%1*10),i_capID),"ADCvsfC_%i_range_%i_shunt_%i_%i_capID_%i"%(ih,i_range,int(shuntMult),int(shuntMult%1*10),i_capID))
 
                 graphs[ih].append(ADCvsfC)
          

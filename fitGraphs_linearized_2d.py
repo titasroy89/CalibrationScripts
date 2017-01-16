@@ -50,13 +50,13 @@ shuntMultList = shunt_Val.keys()
 shuntMultList.sort()
 
 
-def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = "", useCalibrationMode = True, outputDir = '', shuntMult = 1):
+def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = "", useCalibrationMode = True, outputDir = '', shuntMult = 1,pedestal=None):
 
         fitLines =  []
         slopes =  []
         offsets =  []
         
-        pedestal = [-13.33]*4
+#        pedestal = [-13.33]*4
         linearizedGraphList =  []
 
         #print graphList
@@ -68,7 +68,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         if shuntMult == 1: 
                 ranges = range(4)
         else :
-                ranges = range(3)
+                ranges = range(2)
         for i_range in ranges:
                 vOffset = i_range*64
                 graphs = graphList[i_range]
@@ -79,20 +79,24 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                 else:                   
                         fitLines.append([])
 
+
+		if pedestal==None:
+			pedestal = []
+
                 for i_capID in range(4):
                         #print i_graph
                         nominalgraph =  graphs[i_capID]
                         if shuntMult == 1:
-                                nominalgraph.SetNameTitle('%s_range_%i_shunt_%.1f'%(nominalgraph.GetName(),i_range,shuntMult),'%s_range_%i_%.1f'%(nominalgraph.GetName(),i_range,shuntMult))
+                                nominalgraph.SetNameTitle('%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)),'%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)))
                                 outputTGraphs.cd("adcVsCharge")
                         else:
-                                nominalgraph.SetNameTitle('%s_range_%i_shunt_%.1f'%(nominalgraph.GetName(),i_range,shuntMult),'%s_range_%i_shunt_%.1f'%(nominalgraph.GetName(),i_range, shuntMult))
+                                nominalgraph.SetNameTitle('%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)),'%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)))
                                 outputTGraphs.cd("Shunted_adcVsCharge")
                         nominalgraph.Write()
                         graph = nominalgraph.Clone("%s_linearized"%nominalgraph.GetName())
                         graph.SetNameTitle("%s_linearized"%nominalgraph.GetName(),"%s_linearized"%nominalgraph.GetName())
 #                       nominalgraph.Write()
-                        if i_range==0:
+                        if i_range==0 and len(pedestal)<4:
                                 for n in range(graph.GetN()):
                                         if graph.GetX()[n]>2:
                                                 x1 = graph.GetX()[n+1]
@@ -100,10 +104,12 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                                 x2 = graph.GetX()[n+2]
                                                 y2 = graph.GetY()[n+2]
                                                 if x1==x2: 
-                                                        pedestal[i_capID]=0
+							pedestal.append(0)
+#                                                        pedestal[i_capID]=0
                                                 else:
                                                         m = (y2-y1)/(x2-x1)                                             
-                                                        pedestal[i_capID] = y1 - m*x1
+							pedestal.append(y1 - m*x1)
+#                                                        pedestal[i_capID] = y1 - m*x1
                                                 break
 
                         points = range(graph.GetN())
@@ -114,6 +120,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 x = graph.GetX()[n]-vOffset
                                 nominalgraph.GetY()[n] -= pedestal[i_capID]
                                 graph.GetY()[n] -= pedestal[i_capID]
+
                                 if x<1 or x>62:
                                         graph.RemovePoint(n)
                                         continue
@@ -132,15 +139,21 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 graph.GetEX()[n] = _ey
                                 graph.GetY()[n] = _x
                                 graph.GetEY()[n] = _ex
+			if i_range==0:
+				graph.RemovePoint(0)
+
                         graph.GetXaxis().SetTitle("Charge (fC)")
                         graph.GetYaxis().SetTitle("Linearized ADC")
 
-                        if shuntMult == -1: 
+                        if shuntMult == 1: 
                                 outputTGraphs.cd("LinadcVsCharge")
                         else:
                                 outputTGraphs.cd("Shunted_LinadcVsCharge")
                         
                         graph.Write()
+
+			print pedestal
+
                         if graph.GetN() > 1:
                                 graph.Fit("pol1","0")
                                 linearizedGraphList.append(graph)
@@ -295,7 +308,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                 
                 params = [[],[],[],[]]
         else:
-                ranges = range(3)
+                ranges = range(2)
                 params = [[],[],[]]
 
         for irange in ranges:
@@ -314,12 +327,13 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         # outputTGraphs.cd("LinadcVsCharge")
         # for graph in linearizedGraphList:
         #       graph.Write()
-        if shuntMult==-1:
+
+        if shuntMult==1:
                 outputTGraphs.cd("fitLines")
                 ranges = range(4)
         else:
                 outputTGraphs.cd("Shunted_fitLines")
-                ranges = range(3)
+                ranges = range(2)
         for i_range in ranges:
                 if graphList[i_range]==None: continue
 #                print 'Writing'
@@ -382,7 +396,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 
                         c1.SaveAs(saveName)
 
-        return params
+        return params, pedestal
 
 
 

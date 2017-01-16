@@ -67,7 +67,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1):
                                         
                                         for i_capID in range(4):
                                                 offset = 64*(i_capID)
-                                                hist.GetYaxis().SetRangeUser(offset, offset+63)
+                                                hist.GetYaxis().SetRangeUser(offset, offset+63.5)
                                                 info["mean"].append(hist.GetMean(2)-offset+rangeADCoffset)
                                                 info["rms"].append(max(hist.GetRMS(2), 0.01))
                                         results[i_qieRange][histNum][dacVal] = info
