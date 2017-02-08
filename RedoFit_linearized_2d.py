@@ -264,7 +264,8 @@ def QIECalibrationScan(options):
 			else:
 				graphList_shunt.append(None)
 
-			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestal = pedestalVals)
+			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult)
+# 			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestal = pedestalVals)
 			print params_shunt
 			uID = qieID.replace(' ', '_')
 

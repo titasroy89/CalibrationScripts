@@ -50,13 +50,13 @@ shuntMultList = shunt_Val.keys()
 shuntMultList.sort()
 
 
-def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = "", useCalibrationMode = True, outputDir = '', shuntMult = 1,pedestal=None):
+def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = "", useCalibrationMode = True, outputDir = '', shuntMult = 1):
 
         fitLines =  []
         slopes =  []
         offsets =  []
         
-#        pedestal = [-13.33]*4
+        pedestal = [-13.33]*4
         linearizedGraphList =  []
 
         #print graphList
@@ -96,20 +96,23 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                         graph = nominalgraph.Clone("%s_linearized"%nominalgraph.GetName())
                         graph.SetNameTitle("%s_linearized"%nominalgraph.GetName(),"%s_linearized"%nominalgraph.GetName())
 #                       nominalgraph.Write()
-                        if i_range==0 and len(pedestal)<4:
-                                for n in range(graph.GetN()):
+                        if i_range==0:
+                                for n in range(graph.GetN()):					
                                         if graph.GetX()[n]>2:
                                                 x1 = graph.GetX()[n+1]
                                                 y1 = graph.GetY()[n+1]
                                                 x2 = graph.GetX()[n+2]
                                                 y2 = graph.GetY()[n+2]
+						print graph.GetX()[n], x1, x2
+
                                                 if x1==x2: 
-							pedestal.append(0)
+							continue
+#							pedestal.append(0)
 #                                                        pedestal[i_capID]=0
                                                 else:
                                                         m = (y2-y1)/(x2-x1)                                             
-							pedestal.append(y1 - m*x1)
-#                                                        pedestal[i_capID] = y1 - m*x1
+#							pedestal.append(y1 - m*x1)
+                                                        pedestal[i_capID] = y1 - m*x1
                                                 break
 
                         points = range(graph.GetN())
