@@ -72,7 +72,6 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         for i_range in ranges:
                 vOffset = i_range*64
                 graphs = graphList[i_range]
-#                print graphs
                 if graphs==None: 
                         fitLines.append(None)
                         continue
@@ -86,6 +85,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                 for i_capID in range(4):
                         #print i_graph
                         nominalgraph =  graphs[i_capID]
+			print nominalgraph.GetName()
                         if shuntMult == 1:
                                 nominalgraph.SetNameTitle('%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)),'%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)))
                                 outputTGraphs.cd("adcVsCharge")
@@ -101,8 +101,18 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                         if graph.GetX()[n]>2:
                                                 x1 = graph.GetX()[n+1]
                                                 y1 = graph.GetY()[n+1]
-                                                x2 = graph.GetX()[n+2]
-                                                y2 = graph.GetY()[n+2]
+                                                x2 = graph.GetX()[n+4]
+                                                y2 = graph.GetY()[n+4]
+						if x2 >15:
+							x2 = graph.GetX()[n+3]
+							y2 = graph.GetY()[n+3]
+							if x2 >15:
+								x2 = graph.GetX()[n+2]
+								y2 = graph.GetY()[n+2]
+
+						if not x2 > x1: continue
+						if not x1 > 2: continue
+							
 						print graph.GetX()[n], x1, x2
 
                                                 if x1==x2: 
