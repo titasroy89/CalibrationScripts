@@ -7,6 +7,8 @@ import sys
 from numpy import std
 from ROOT import *
 
+from getPedestals import *
+
 #script to control DAC
 from DAC import *
 
@@ -214,7 +216,27 @@ def QIECalibrationScan(options):
 
 	pedestalVals = {}
 
-        print"I am here"
+	print "Get Pedestals"
+
+	pedestal_graphs_shunt ={}
+        for shuntMult in shuntMult_list:
+                output={}
+                shuntOutputDirectory = outputDirectory #+ "Data_%s_%s/"%(rangeMode, shuntMode)
+                vals = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
+		pedestal_graphs_shunt[shuntMult] = makeADCvsfCgraphSepCapID(vals[0],histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=0,shuntMult=shuntMult)
+
+	
+	_filePeds = TFile("pedestalTest.root","recreate")
+	_filePeds.Close()
+
+	pedestalVals = getPedestals(pedestal_graphs_shunt,shuntMult_list,histoList,outputDirectory)
+
+	for ih in histoList:
+		#get low current pedestal
+		print pedestal_graphs_shunt[1.0][ih]
+		print pedestalVals[ih]
+
+#	sys.exit()
 
         for shuntMult in shuntMult_list:
                 graphs_shunt ={}
@@ -264,7 +286,7 @@ def QIECalibrationScan(options):
 			else:
 				graphList_shunt.append(None)
 
-			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult)
+			params_shunt =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestalVals = pedestalVals[ih])
 # 			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestal = pedestalVals)
 			print params_shunt
 			uID = qieID.replace(' ', '_')
@@ -273,6 +295,9 @@ def QIECalibrationScan(options):
 				for i_capID in range(4):
 					print shuntMult, i_range, i_capID
 					values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], params_shunt[i_range][i_capID][1],params_shunt[i_range][i_capID][2])
+					if i_range == 0:
+						values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], 0,params_shunt[i_range][i_capID][2])
+					print values_shunt
 					cursor[uID].execute("insert into qieshuntparams values (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)",values_shunt)
 					# print values_shunt
 					outputParamFile_shunt.write(str(values_shunt)+'\n')

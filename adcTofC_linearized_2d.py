@@ -25,7 +25,7 @@ nominalMapping = { 1 : 4,
 
 def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
 
-    conSlopes = lite.connect("SlopesOffsets_final.db")
+    conSlopes = lite.connect("Slopes_Offsets_new.db")
    
 
     print 'Making TGraphs from histos'
@@ -45,18 +45,22 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
     else:
         highCurrent = False
     print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
-    print highCurrent
+    if highCurrent:
+        print "Using high-current mode"
+    else:
+        print "Using low-current mode"
+#    print highCurrent
     #print values
     lsbList = values[histo_list[0]].keys()
     lsbList.sort()
 #    print "dac values for this combination",lsbList
-    print histo_list
+#    print histo_list
     for ih in histo_list:
             QIE_values = []
         #    print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
 
             channel = (ih % 12 + 1)
-            print "ih",ih
+#            print "ih",ih
             linkNum = int(ih/6)
 
             backplane_slotNum = linkMap[linkNum]['slot']
@@ -117,7 +121,7 @@ def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, inj
                     
                 ADCvsfC=TGraphErrors(len(fc_array),adc_array,fc_array,adcerr_array_new,fCerror_array)
                 ### Change the name, removing the decimal from the shuntmult (replacing it separated with an underscore) to make it openable in root command line
-                ADCvsfC.SetNameTitle("ADCvsfC_%i_range_%i_shunt_%i_%i_capID_%i"%(ih,i_range,int(shuntMult),int(shuntMult%1*10),i_capID),"ADCvsfC_%i_range_%i_shunt_%i_%i_capID_%i"%(ih,i_range,int(shuntMult),int(shuntMult%1*10),i_capID))
+                ADCvsfC.SetNameTitle("ADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID),"ADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID))
 
                 graphs[ih].append(ADCvsfC)
          
