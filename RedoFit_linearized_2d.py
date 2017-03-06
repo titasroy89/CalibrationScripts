@@ -225,11 +225,16 @@ def QIECalibrationScan(options):
                 vals = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
 		pedestal_graphs_shunt[shuntMult] = makeADCvsfCgraphSepCapID(vals[0],histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=0,shuntMult=shuntMult)
 
-	
-	_filePeds = TFile("pedestalTest.root","recreate")
+	dirStructure = outputDirectory.split('/')
+	for value in dirStructure:
+		if '2016' in value:
+			date = value
+		if 'Run' in value:
+			run = value
+	_filePeds = TFile("%s/PedestalPlots/pedestalMeasurement_%s_%s.root"%(outputDirectory,date, run),"recreate")
 	_filePeds.Close()
 
-	pedestalVals = getPedestals(pedestal_graphs_shunt,shuntMult_list,histoList,outputDirectory)
+	pedestalVals = getPedestals(pedestal_graphs_shunt,shuntMult_list,histoList,outputDirectory, date, run)
 
 	for ih in histoList:
 		#get low current pedestal

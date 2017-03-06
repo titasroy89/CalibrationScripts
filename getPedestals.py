@@ -8,9 +8,15 @@ def linearizeGraph(graph, i_range):
     points = range(graph.GetN())
     points.reverse()
     removeRest = False
+    graph.SetNameTitle(graph.GetName().replace("ADC","linADC"),graph.GetName().replace("ADC","linADC"))
+
     for n in points:
         x = graph.GetX()[n]-vOffset
         if x>62:
+            graph.RemovePoint(n)
+            continue
+
+        if n==0:
             graph.RemovePoint(n)
             continue
 
@@ -31,18 +37,20 @@ def linearizeGraph(graph, i_range):
     return graph
 
 
-def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName):
+def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
     pedestalVals = {}
 
     if not os.path.exists("%s/PedestalPlots"%dirName):
         os.mkdir("%s/PedestalPlots"%dirName)
     
 
-    _file = TFile("%s/PedestalPlots/pedestalMeasurment.root"%dirName,"update")
+    _file = TFile("%s/PedestalPlots/pedestalMeasurement_%s_%s.root"%(dirName,date,run),"update")
 
     c1 = TCanvas()
     c1.Divide(2,2)
     for ih in histoList:
+        _file.mkdir("h%i"%ih)
+        _file.cd("h%i"%ih)
         print ih
         #get low current
         lowCurrentPeds = []
@@ -51,6 +59,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName):
             graph = linearizeGraph(graphs_shunt[1.0][ih][i_capID],0)
             graph.Fit("pol1")
             line = graph.GetFunction("pol1")
+            graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
             lowCurrentPeds.append(-1*line.GetParameter(0)/line.GetParameter(1))
 
@@ -65,6 +74,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName):
             for i_capID in range(4):
                 graph = linearizeGraph(graphs_shunt[i_shunt][ih][i_capID],0)
                 graph.Fit("pol1")
+                graph.Write()
                 line = graph.GetFunction("pol1")
                 highCurrentShuntPeds[i_shunt].append(-1*line.GetParameter(0)/line.GetParameter(1))
 
