@@ -48,6 +48,9 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
 
     c1 = TCanvas()
     c1.Divide(2,2)
+
+    shuntPeds = {}
+    
     for ih in histoList:
         _file.mkdir("h%i"%ih)
         _file.cd("h%i"%ih)
@@ -109,7 +112,8 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
         c1.SaveAs("%s/PedestalPlots/%s.pdf"%(dirName,graphs_shunt[1.0][ih][0].GetTitle().replace("_shunt_1_0_capID_0","")))
         
         pedestalVals[ih] = {"low":lowCurrentPeds,
-                            "high":highCurrentPeds
+                            "high":highCurrentPeds,
+                            "shunts":highCurrentShuntPeds,
                             }
 
     _file.Close()

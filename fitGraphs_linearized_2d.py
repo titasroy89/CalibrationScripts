@@ -50,7 +50,7 @@ shuntMultList = shunt_Val.keys()
 shuntMultList.sort()
 
 
-def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = "", useCalibrationMode = True, outputDir = '', shuntMult = 1, pedestalVals = {"low":[0,0,0,0],"high":[0,0,0,0]}):
+def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = "", useCalibrationMode = True, outputDir = '', shuntMult = 1, pedestalVals = {"low":[0,0,0,0],"high":[0,0,0,0],"shunt":{}}):
 
         fitLines =  []
         slopes =  []
@@ -66,9 +66,6 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         saveName = None
 
 
-
-
-
         if shuntMult == 1: 
                 ranges = range(4)
         else :
@@ -78,8 +75,11 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 	#choose the pedestal to subtract according to the whether it is low current or high current
 		if i_range == 0 and shuntMult==1:
 			pedestal = pedestalVals["low"]
-		else:
+		elif  shuntMult==1:
 			pedestal = pedestalVals["high"]
+		else:
+			pedestal = pedestalVals["shunt"][shuntMult]
+
 
                 vOffset = i_range*64
                 graphs = graphList[i_range]
