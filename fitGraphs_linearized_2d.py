@@ -78,7 +78,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 		elif  shuntMult==1:
 			pedestal = pedestalVals["high"]
 		else:
-			pedestal = pedestalVals["shunt"][shuntMult]
+			pedestal = pedestalVals["shunts"][shuntMult]
 
 
                 vOffset = i_range*64
