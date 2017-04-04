@@ -3,6 +3,8 @@ from linearADC import *
 import os
 from array import array
 
+bin0startLevel = -0.5
+
 def linearizeGraph(graph, i_range):
     vOffset = i_range*64
     points = range(graph.GetN())
@@ -64,7 +66,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             line = graph.GetFunction("pol1")
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
-            lowCurrentPeds.append(-1*line.GetParameter(0)/line.GetParameter(1))
+            lowCurrentPeds.append(-1*(line.GetParameter(0)+bin0startLevel)/line.GetParameter(1))
 
 
         #get high current peds
@@ -79,7 +81,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
                 graph.Fit("pol1")
                 graph.Write()
                 line = graph.GetFunction("pol1")
-                highCurrentShuntPeds[i_shunt].append(-1*line.GetParameter(0)/line.GetParameter(1))
+                highCurrentShuntPeds[i_shunt].append(-1*(line.GetParameter(0)+bin0startLevel)/line.GetParameter(1))
 
 
         #make graphs of the shunt vs measured pedestal
