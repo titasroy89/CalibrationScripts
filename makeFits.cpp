@@ -103,19 +103,20 @@ void makeFits() {
   TGraphErrors * g8shunt =(TGraphErrors*)  _file->Get("Shunted_LinadcVsCharge/ADCvsfC_120_1_range_1_shunt_6_0_capID_3_linearized");
 
   std::cout << "before linear fit" << std::endl;
-  g1->Fit("pol1");
-  g2->Fit("pol1");
-  g3->Fit("pol1");
-  g4->Fit("pol1");
-  g5->Fit("pol1");
-  g6->Fit("pol1");
-  g7->Fit("pol1");
-  g8->Fit("pol1");
+  TF1 *pol1 = new TF1("pol1","pol1",200,600);
+  g1->Fit("pol1","R");
+  g2->Fit("pol1","R");
+  g3->Fit("pol1","R");
+  g4->Fit("pol1","R");
+  g5->Fit("pol1","0");
+  g6->Fit("pol1","0");
+  g7->Fit("pol1","0");
+  g8->Fit("pol1","0");
   std::cout << "before get parameters" << std::endl;
-  double offset1 = g1->GetFunction("pol1")->GetParameter(0);
-  double offset2 = g2->GetFunction("pol1")->GetParameter(0);
-  double offset3 = g3->GetFunction("pol1")->GetParameter(0);
-  double offset4 = g4->GetFunction("pol1")->GetParameter(0);
+  double offset1 = 0.0; //g1->GetFunction("pol1")->GetParameter(0);
+  double offset2 = 0.0; //g2->GetFunction("pol1")->GetParameter(0);
+  double offset3 = 0.0; //g3->GetFunction("pol1")->GetParameter(0);
+  double offset4 = 0.0; //g4->GetFunction("pol1")->GetParameter(0);
   double offset5 = g5->GetFunction("pol1")->GetParameter(0);
   double offset6 = g6->GetFunction("pol1")->GetParameter(0);
   double offset7 = g7->GetFunction("pol1")->GetParameter(0);
@@ -128,7 +129,7 @@ void makeFits() {
   double slope6 = g6->GetFunction("pol1")->GetParameter(1);
   double slope7 = g7->GetFunction("pol1")->GetParameter(1);
   double slope8 = g8->GetFunction("pol1")->GetParameter(1);
-
+  std::cout << offset1 << std::endl;
   // Define functions with slopes/offsets hardcoded in for testing purposes
 //   TF1 * f1 = new TF1("fit1","[0]*(7.58965106426878929e-03+3.06953080266622103e-01*x)",0,100);
 //   TF1 * f2 = new TF1("fit2","[0]*(9.82985765887945534e-04+3.06370846586603629e-01*x)",0,100);
@@ -197,15 +198,12 @@ void makeFits() {
   ROOT::Fit::Chi2Function chi2_6(data6, wf6);
   ROOT::Fit::Chi2Function chi2_7(data7, wf7);
   ROOT::Fit::Chi2Function chi2_8(data8, wf8);
-  std::cout << "HERE" << std::endl;
 
 
   GlobalChi2 globalChi2(chi2_1, chi2_2, chi2_3, chi2_4, chi2_5, chi2_6, chi2_7, chi2_8);
 
   ROOT::Fit::Fitter fitter;
-  std::cout << "HERE" << std::endl;
 
-  std::cout<< offset1 << std::endl;
   const int Npar = 17;
   double par0[Npar] = { 6, 
 			offset1, slope1,
@@ -238,22 +236,14 @@ void makeFits() {
   fitter.Config().ParSettings(15).Fix();
   fitter.Config().ParSettings(16).Fix();
 
- // cout << "HERE2" << endl;
 
   fitter.Config().MinimizerOptions().SetPrintLevel(0);
   fitter.Config().SetMinimizer("Minuit2","Migrad");
- // cout << "HERE2" << endl;
-
-  // fit FCN function directly
-  // (specify optionally data size and flag to indicate that is a chi2 fit)
- // cout << "HERE2" << endl;
   fitter.FitFCN(17,globalChi2,0,data1.Size()+data2.Size()+data3.Size()+data4.Size()+data5.Size()+data6.Size()+data7.Size()+data8.Size(),true);
   ROOT::Fit::FitResult result = fitter.Result();
   result.Print(std::cout);
-  //std::cout<< result.Parameter(0), result.Parameter(2) <<std::endl;
- // cout << "HERE2" << endl;
+  
   TCanvas * c1 = new TCanvas("Simfit","Simultaneous fit of 8 graphs",700,700);
-  //TCanvas * c1 = new TCanvas("Simultaneous fit");
   c1->Divide(2,4);
   c1->cd(1);
   gStyle->SetOptFit(1111);
@@ -314,5 +304,5 @@ void makeFits() {
   g8shunt->Draw("alp");
 
 
-  c1->SaveAs("ranges_simultfit.pdf");
+  c1->SaveAs("qie1_0x86000000_0xead65570_method2.pdf");
 }
