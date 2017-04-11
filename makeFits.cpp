@@ -138,14 +138,14 @@ void makeFits() {
 
 
   // define functions with slopes and offsets as additional parameters, these can then be set and fixed (not fit)
-  TF1 * f1 = new TF1("fit1","[0]*([1]+[2]*x)",0,100);
-  TF1 * f2 = new TF1("fit2","[0]*([1]+[2]*x)",0,100);
-  TF1 * f3 = new TF1("fit3","[0]*([1]+[2]*x)",0,100);
-  TF1 * f4 = new TF1("fit4","[0]*([1]+[2]*x)",0,100);
-  TF1 * f5 = new TF1("fit5","[0]*([1]+[2]*x)",0,100);
-  TF1 * f6 = new TF1("fit6","[0]*([1]+[2]*x)",0,100);
-  TF1 * f7 = new TF1("fit7","[0]*([1]+[2]*x)",0,100);
-  TF1 * f8 = new TF1("fit8","[0]*([1]+[2]*x)",0,100);
+  TF1 * f1 = new TF1("fit1","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f2 = new TF1("fit2","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f3 = new TF1("fit3","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f4 = new TF1("fit4","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f5 = new TF1("fit5","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f6 = new TF1("fit6","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f7 = new TF1("fit7","[0]*([1]+[2]*x)",200,9e9);
+  TF1 * f8 = new TF1("fit8","[0]*([1]+[2]*x)",200,9e9);
 
   // perform now global fit
   //cout << "HERE" << endl;
@@ -162,7 +162,7 @@ void makeFits() {
   ROOT::Fit::DataOptions opt;
   ROOT::Fit::DataRange range;
   // set the data range
-  range.SetRange(0,9e9);
+  range.SetRange(200,9e9);
   std::cout << "HERE" << std::endl;
 
 
