@@ -300,8 +300,8 @@ def QIECalibrationScan(options):
 				for i_capID in range(4):
 					print shuntMult, i_range, i_capID
 					values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], params_shunt[i_range][i_capID][1],params_shunt[i_range][i_capID][2])
-					if i_range == 0:
-						values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], 0,params_shunt[i_range][i_capID][2])
+					#if i_range == 0:
+					#	values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], 0,params_shunt[i_range][i_capID][2])
 					print values_shunt
 					cursor[uID].execute("insert into qieshuntparams values (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)",values_shunt)
 					# print values_shunt

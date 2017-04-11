@@ -167,7 +167,9 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 graph.GetEY()[n] = _linADCErr
 			if i_range==0:
 				graph.RemovePoint(0)
-
+				if (shuntMult ==1):
+					graph.GetXaxis().SetRangeUser(200,600)
+					graph.GetYaxis().SetRangeUser(50,200)
                         graph.GetXaxis().SetTitle("Charge (fC)")
                         graph.GetYaxis().SetTitle("Linearized ADC")
 
@@ -180,9 +182,13 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 #			print pedestal
 
                         if graph.GetN() > 1:
-                                graph.Fit("pol1","0")				
+				f1= TF1("f1","pol1",200,600);
+				if (i_range==0 and shuntMult==1):
+					graph.Fit("f1","R") 
+				else:
+					graph.Fit("f1","0") 				
                                 linearizedGraphList.append(graph)                                
-                                fitLine = graph.GetFunction("pol1")
+                                fitLine = graph.GetFunction("f1")
 
 # This will calculate the pedestal based on the result of the range 0 fit
 # 				if i_range==0:
@@ -192,7 +198,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 fitLines[-1].append(fitLine)
                         else:
                                 linearizedGraphList.append(graph)
-                                fitLine = TF1("fit_%s"%graph.GetName(),"pol1",-999,999)
+                                fitLine = TF1("fit_%s"%graph.GetName(),"f1",-999,999)
                                 fitLine.SetParameter(0,0)
                                 fitLine.SetParameter(1,0)
                                 fitLine.SetParError(0,999)
@@ -290,8 +296,10 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 xmax = graph.GetXaxis().GetXmax()
                                 ymin = graph.GetYaxis().GetXmin()
                                 ymax = graph.GetYaxis().GetXmax()
-
-                                text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
+				if (i_range==0 and shuntMult==1):
+					 text = TPaveText(200 + (600-200)*.2, 200 - (200-50)*(.3),200 + (600-200)*.6,200-(200-50)*.1)
+				else:
+                                	text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
                                 text.SetFillColor(kWhite)
                                 text.SetFillStyle(8000)
                                 text.AddText("Slope =  %.4f +- %.4f ADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))
@@ -315,8 +323,10 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                         # graph.GetXaxis().SetLimits(xmin-10,xmax+10)
                                 graph.GetXaxis().SetLimits(minCharge*0.9, maxCharge*1.1)
                                 graph.GetYaxis().SetLimits(ymin*.9,ymax*1.1)
-
-                                residualGraphX.GetXaxis().SetLimits(minCharge*0.9, maxCharge*1.1)
+				if (i_range==0 and shuntMult==1):
+					 residualGraphX.GetXaxis().SetLimits(200, 600)
+				else:
+                                	residualGraphX.GetXaxis().SetLimits(minCharge*0.9, maxCharge*1.1)
                                 residualGraphX.GetYaxis().SetRangeUser(-0.03,0.03)
                                 residualGraphX.SetMarkerStyle(7)
                                 residualGraphX.GetYaxis().SetNdivisions(3,5,0)
