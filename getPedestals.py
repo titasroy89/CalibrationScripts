@@ -62,7 +62,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
         for i_capID in range(4):
             #linearize the graph first 
             graph = linearizeGraph(graphs_shunt[1.0][ih][i_capID],0)
-            graph.Fit("pol1")
+            graph.Fit("pol1","R","0",200,9e9)
             line = graph.GetFunction("pol1")
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
@@ -78,7 +78,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             highCurrentShuntPeds[i_shunt]=[]
             for i_capID in range(4):
                 graph = linearizeGraph(graphs_shunt[i_shunt][ih][i_capID],0)
-                graph.Fit("pol1")
+                graph.Fit("pol1","R","0",200,9e9)
                 graph.Write()
                 line = graph.GetFunction("pol1")
                 highCurrentShuntPeds[i_shunt].append(-1*(line.GetParameter(0)+bin0startLevel)/line.GetParameter(1))
@@ -98,11 +98,11 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
                 
             graphs.append(TGraph(len(x),_x,_y))
             graphs[-1].SetNameTitle(graphs_shunt[1.0][ih][i_capID].GetTitle().replace("_shunt_1_0_","_"),graphs_shunt[1.0][ih][i_capID].GetTitle().replace("_shunt_1_0_","_"))
-
+	    graphs[-1].GetYaxis().SetRangeUser(-500,150)
             graphs[-1].Fit("pol1")
             line = graphs[-1].GetFunction("pol1")
             c1.cd(i_capID+1)
-            graphs[-1].SetMarkerStyle(2)
+            graphs[-1].SetMarkerStyle(7)
             graphs[-1].SetMarkerSize(2)
             graphs[-1].GetXaxis().SetTitle("Shunt Value (nominal)")
             graphs[-1].GetYaxis().SetTitle("Measured total pedestal")
