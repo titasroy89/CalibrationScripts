@@ -167,9 +167,9 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 graph.GetEY()[n] = _linADCErr
 			if i_range==0:
 				graph.RemovePoint(0)
-				if (shuntMult ==1):
-					graph.GetXaxis().SetRangeUser(200,600)
-					graph.GetYaxis().SetRangeUser(50,200)
+# 				if (shuntMult ==1):
+# 					graph.GetXaxis().SetRangeUser(200,600)
+# 					graph.GetYaxis().SetRangeUser(50,200)
                         graph.GetXaxis().SetTitle("Charge (fC)")
                         graph.GetYaxis().SetTitle("Linearized ADC")
 
@@ -182,13 +182,15 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 #			print pedestal
 
                         if graph.GetN() > 1:
-				f1= TF1("f1","pol1",200,600);
-				if (i_range==0 and shuntMult==1):
-					graph.Fit("f1","R") 
-				else:
-					graph.Fit("f1","0") 				
+				graph.Fit("pol1","","",200,9e9) 
+#				f1= TF1("f1","pol1",200,600);
+# 				if (i_range==0 and shuntMult==1):
+# 					graph.Fit("f1","R") 
+# 				else:
+# 					graph.Fit("f1","0") 				
                                 linearizedGraphList.append(graph)                                
-                                fitLine = graph.GetFunction("f1")
+#                                 fitLine = graph.GetFunction("f1")
+				fitLine = graph.GetFunction("pol1")
 
 # This will calculate the pedestal based on the result of the range 0 fit
 # 				if i_range==0:
@@ -198,7 +200,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 fitLines[-1].append(fitLine)
                         else:
                                 linearizedGraphList.append(graph)
-                                fitLine = TF1("fit_%s"%graph.GetName(),"f1",-999,999)
+                                fitLine = TF1("fit_%s"%graph.GetName(),"pol1",-999,999)
                                 fitLine.SetParameter(0,0)
                                 fitLine.SetParameter(1,0)
                                 fitLine.SetParError(0,999)

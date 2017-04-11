@@ -14,20 +14,23 @@ def linearizeGraph(graph, i_range):
 
     for n in points:
         x = graph.GetX()[n]-vOffset
-        if x>62:
+        if x<1 or x>62:
             graph.RemovePoint(n)
             continue
 
-        if n==0:
-            graph.RemovePoint(n)
-            continue
+#         if x>62:
+#             graph.RemovePoint(n)
+#             continue
+#         if n==0:
+#             graph.RemovePoint(n)
+#             continue
 
-        if x < 1:
-            removeRest=True
+#         if x < 1:
+#             removeRest=True
 
-        if removeRest:
-            graph.RemovePoint(n)
-            continue
+#         if removeRest:
+#             graph.RemovePoint(n)
+#             continue
 
         _linADC, _linADCErr = linADC(graph.GetX()[n],graph.GetEX()[n])
         _charge = graph.GetY()[n]
@@ -36,6 +39,8 @@ def linearizeGraph(graph, i_range):
         graph.GetEX()[n] = _chargeErr
         graph.GetY()[n] = _linADC
         graph.GetEY()[n] = _linADCErr
+    if i_range==0:
+        graph.RemovePoint(0)
     return graph
 
 
@@ -62,11 +67,12 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
         for i_capID in range(4):
             #linearize the graph first 
             graph = linearizeGraph(graphs_shunt[1.0][ih][i_capID],0)
-            graph.Fit("pol1","R","0",200,9e9)
+            print graph.GetName()
+            graph.Fit("pol1","0")
             line = graph.GetFunction("pol1")
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
-            lowCurrentPeds.append(-1*(line.GetParameter(0)+bin0startLevel)/line.GetParameter(1))
+            lowCurrentPeds.append(-1*(line.GetParameter(0)-bin0startLevel)/line.GetParameter(1))
 
 
         #get high current peds
@@ -78,10 +84,10 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             highCurrentShuntPeds[i_shunt]=[]
             for i_capID in range(4):
                 graph = linearizeGraph(graphs_shunt[i_shunt][ih][i_capID],0)
-                graph.Fit("pol1","R","0",200,9e9)
+                graph.Fit("pol1","0")
                 graph.Write()
                 line = graph.GetFunction("pol1")
-                highCurrentShuntPeds[i_shunt].append(-1*(line.GetParameter(0)+bin0startLevel)/line.GetParameter(1))
+                highCurrentShuntPeds[i_shunt].append(-1*(line.GetParameter(0)-bin0startLevel)/line.GetParameter(1))
 
 
         #make graphs of the shunt vs measured pedestal
