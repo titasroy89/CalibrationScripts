@@ -1,6 +1,6 @@
 from ROOT import *
 import sqlite3
-
+from array import array
 gROOT.SetBatch(kTRUE)
 shunt_Val ={1:0,
             1.5:1,
@@ -31,9 +31,29 @@ def graphParamDist(paramFileName):
         
         print uniqueID
         hists = {}
+	#slopes_ = [[[array('d') for i in range(12)] for i in range(13)] for i in range(2)]
+	slopes_ = {}
+       
         parameterValues = cursor.execute("select * from qieshuntparams where id = ?", [str(uniqueID)]).fetchall()
         for shuntMult in shuntMultList:
-
+	    slopes_[shuntMult]={}
+	    slopes_[shuntMult][0] = {0:array('d'),
+				  1:array('d'),
+				  2:array('d'),
+				  3:array('d'),} 
+            slopes_[shuntMult][1] = {0:array('d'),
+                                  1:array('d'),
+                                  2:array('d'),
+                                  3:array('d'),} 
+            slopes_[shuntMult][2] = {0:array('d'),
+                                  1:array('d'),
+                                  2:array('d'),
+                                  3:array('d'),} 
+     
+	    slopes_[shuntMult][3] = {0:array('d'),
+                                  1:array('d'),
+                                  2:array('d'),
+                                  3:array('d'),} 
             range0MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),0,shuntMult]).fetchone()
             range1MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),1,shuntMult]).fetchone()
             range2MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),2,shuntMult]).fetchone()
@@ -50,81 +70,47 @@ def graphParamDist(paramFileName):
                                 2:[TH1F("Range2Slopes_shunt%.1f"%shuntMult,"Range2Slopes_shunt%.1f"%shuntMult,50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets_shunt%.1f"%shuntMult,"Range2Offsets_shunt%.1f"%shuntMult,50,range2MinMax[2]*1.2, range2MinMax[3]*1.2), TH1F("Range2Uncertainties_shunt%.1f"%shuntMult,"Range2Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
                                 3:[TH1F("Range3Slopes_shunt%.1f"%shuntMult,"Range3Slopes_shunt%.1f"%shuntMult,50,range3MinMax[0]*0.8,range3MinMax[1]*1.2), TH1F("Range3Offsets_shunt%.1f"%shuntMult,"Range3Offsets_shunt%.1f"%shuntMult,50,range3MinMax[2]*1.2, range3MinMax[3]*1.2), TH1F("Range3Uncertainties_shunt%.1f"%shuntMult,"Range3Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
                      }
-            # if shuntMult == 1:
-            #     hists_1 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #      1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #      2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #      3:[TH1F("Range3Slopes","Range3Slopes",50,range3MinMax[0]*0.8,range3MinMax[1]*1.2), TH1F("Range3Offsets","Range3Offsets",50,range3MinMax[2]*1.2, range3MinMax[3]*1.2)],
-            #      }
-            # elif shuntMult == 1.5:
-            #     hists_1half = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                    1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                    2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #      }
-            # elif shuntMult == 2:
-            #      hists_2 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                     1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                     2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #     }
-            # elif shuntMult == 3 :
-            #     hists_3 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #     }          
-            # elif shuntMult == 4:
-            #     hists_4 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #    }
-            # elif shuntMult == 5:
-
-            #      hists_5 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                 1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                 2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                 }
-            # elif shuntMult == 6:
-            #      hists_6 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                 1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                 2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #             }
-            # elif shuntMult == 7:
-            #      hists_7 =  {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                 1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                 2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                     }
-            # elif shuntMult ==8:
-            #     hists_8 =  {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                 1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                 2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                 }
-            # elif shuntMult == 9:
-            #     hists_9 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                }
-            # elif shuntMult == 10:
-            #     hists_10 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                 1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                 2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                 }
-            # elif shuntMult == 11:
-            #     hists_11 = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                 1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                 2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                 }
-            # elif shuntMult == 11.5:
-            #     hists_11half = {0:[TH1F("Range0Slopes","Range0Slopes",50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets","Range0Offsets",50,range0MinMax[2]*1.2, range0MinMax[3]*1.2)],
-            #                     1:[TH1F("Range1Slopes","Range1Slopes",50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets","Range1Offsets",50,range1MinMax[2]*1.2, range1MinMax[3]*1.2)],
-            #                     2:[TH1F("Range2Slopes","Range2Slopes",50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets","Range2Offsets",50,range2MinMax[2]*1.2, range2MinMax[3]*1.2)],
-            #                     }
 
         for entry in parameterValues:
             qieID, serial, qieNum, i_capID, qieRange,shuntMult, directory, timestamp, slope, offset, uncertainty = entry
-                     
+            slopes_[shuntMult][i_capID][qieRange].append(float(slope))         
             hists[shuntMult][qieRange][0].Fill(slope)
             hists[shuntMult][qieRange][1].Fill(offset)
             hists[shuntMult][qieRange][2].Fill(uncertainty)
-                
+#        print slopes_[1][0][0]
+        file_1 = open("%s/Method1_R0_C0_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+	for index in range(12):
+    		file_1.write(str(slopes_[1][0][0][index]) + " " + str(slopes_[1.5][0][0][index]) +" " + str(slopes_[2][0][0][index]) + " " + str(slopes_[3][0][0][index]) +" " + str(slopes_[4][0][0][index]) + " " + str(slopes_[5][0][0][index]) +  " " + str(slopes_[6][0][0][index]) + " " + str(slopes_[7][0][0][index]) + " " + str(slopes_[8][0][0][index]) + " " + str(slopes_[9][0][0][index]) +" " + str(slopes_[10][0][0][index]) + " " + str(slopes_[11][0][0][index]) + " " + str(slopes_[11.5][0][0][index]) +"\n")
+	file_1.close()        
+        file_2 = open("%s/Method1_R0_C1_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_2.write(str(slopes_[1][1][0][index]) + " " + str(slopes_[1.5][1][0][index]) +" " + str(slopes_[2][1][0][index]) + " " + str(slopes_[3][1][0][index]) +" " + str(slopes_[4][1][0][index]) + " " + str(slopes_[5][1][0][index]) +  " " + str(slopes_[6][1][0][index]) + " " + str(slopes_[7][1][0][index]) + " " + str(slopes_[8][1][0][index]) + " " + str(slopes_[9][1][0][index]) +" " + str(slopes_[10][1][0][index]) + " " + str(slopes_[11][1][0][index]) + " " + str(slopes_[11.5][1][0][index]) +"\n")
+        file_2.close()
+        file_3 = open("%s/Method1_R0_C2_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_3.write(str(slopes_[1][2][0][index]) + " " + str(slopes_[1.5][2][0][index]) +" " + str(slopes_[2][2][0][index]) + " " + str(slopes_[3][2][0][index]) +" " + str(slopes_[4][2][0][index]) + " " + str(slopes_[5][2][0][index]) +  " " + str(slopes_[6][2][0][index]) + " " + str(slopes_[7][2][0][index]) + " " + str(slopes_[8][2][0][index]) + " " + str(slopes_[9][2][0][index]) +" " + str(slopes_[10][2][0][index]) + " " + str(slopes_[11][2][0][index]) + " " + str(slopes_[11.5][2][0][index]) +"\n")
+        file_3.close()
+        file_4 = open("%s/Method1_R0_C3_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_4.write(str(slopes_[1][3][0][index]) + " " + str(slopes_[1.5][3][0][index]) +" " + str(slopes_[2][3][0][index]) + " " + str(slopes_[3][3][0][index]) +" " + str(slopes_[4][3][0][index]) + " " + str(slopes_[5][3][0][index]) +  " " + str(slopes_[6][3][0][index]) + " " + str(slopes_[7][3][0][index]) + " " + str(slopes_[8][3][0][index]) + " " + str(slopes_[9][3][0][index]) +" " + str(slopes_[10][3][0][index]) + " " + str(slopes_[11][3][0][index]) + " " + str(slopes_[11.5][3][0][index]) +"\n")
+        file_4.close()
+	file_5 = open("%s/Method1_R1_C0_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_5.write(str(slopes_[1][0][1][index]) + " " + str(slopes_[1.5][0][1][index]) +" " + str(slopes_[2][0][1][index]) + " " + str(slopes_[3][0][1][index]) +" " + str(slopes_[4][0][1][index]) + " " + str(slopes_[5][0][1][index]) +  " " + str(slopes_[6][0][1][index]) + " " + str(slopes_[7][0][1][index]) + " " + str(slopes_[8][0][1][index]) + " " + str(slopes_[9][0][1][index]) +" " + str(slopes_[10][0][1][index]) + " " + str(slopes_[11][0][1][index]) + " " + str(slopes_[11.5][0][1][index]) +"\n")
+        file_5.close()   
+        file_6 = open("%s/Method1_R1_C1_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_6.write(str(slopes_[1][1][1][index]) + " " + str(slopes_[1.5][1][1][index]) +" " + str(slopes_[2][1][1][index]) + " " + str(slopes_[3][1][1][index]) +" " + str(slopes_[4][1][1][index]) + " " + str(slopes_[5][1][1][index]) +  " " + str(slopes_[6][1][1][index]) + " " + str(slopes_[7][1][1][index]) + " " + str(slopes_[8][1][1][index]) + " " + str(slopes_[9][1][1][index]) +" " + str(slopes_[10][1][1][index]) + " " + str(slopes_[11][1][1][index]) + " " + str(slopes_[11.5][1][1][index]) +"\n")
+        file_6.close() 
+        file_7 = open("%s/Method1_R1_C2_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_7.write(str(slopes_[1][2][1][index]) + " " + str(slopes_[1.5][2][1][index]) +" " + str(slopes_[2][2][1][index]) + " " + str(slopes_[3][2][1][index]) +" " + str(slopes_[4][2][1][index]) + " " + str(slopes_[5][2][1][index]) +  " " + str(slopes_[6][2][1][index]) + " " + str(slopes_[7][2][1][index]) + " " + str(slopes_[8][2][1][index]) + " " + str(slopes_[9][2][1][index]) +" " + str(slopes_[10][2][1][index]) + " " + str(slopes_[11][2][1][index]) + " " + str(slopes_[11.5][2][1][index]) +"\n")
+        file_7.close() 
+
+        file_8 = open("%s/Method1_R1_C3_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+        for index in range(12):
+                file_8.write(str(slopes_[1][3][1][index]) + " " + str(slopes_[1.5][3][1][index]) +" " + str(slopes_[2][3][1][index]) + " " + str(slopes_[3][3][1][index]) +" " + str(slopes_[4][3][1][index]) + " " + str(slopes_[5][3][1][index]) +  " " + str(slopes_[6][3][1][index]) + " " + str(slopes_[7][3][1][index]) + " " + str(slopes_[8][3][1][index]) + " " + str(slopes_[9][3][1][index]) +" " + str(slopes_[10][3][1][index]) + " " + str(slopes_[11][3][1][index]) + " " + str(slopes_[11.5][3][1][index]) +"\n")
+        file_8.close() 
 
         outputParamRootFile = TFile("%s/fitResults_%s.root"%(outputDirectory, uniqueID.replace(" ","_")),"update")
 
@@ -136,43 +122,6 @@ def graphParamDist(paramFileName):
                 hists[shuntMult][i_range][1].Write()
                 hists[shuntMult][i_range][2].Write()
                 
-# # print hists                                                                                                                       
-#             for i_range in hists:
-#                 hists[shuntMult][i_range][0].Write()
-#                 hists[shuntMult][i_range][1].Write()
-
-#                 outputParamRootFile.Close()
-#                 c1 = TCanvas()
-#                 c1.cd()
-#                 c1.Divide(2,2)
-
-#                 c1.cd(1)
-#                 hists[1][0][0].Draw()
-#                 hists[shuntMult][0][0].Draw()
-#                 c1.cd(2)
-#                 hists[1][1][0].Draw()
-#                 hists[shuntMult][1][0].Draw()
-#                 c1.cd(3)
-#                 hists[1][2][0].Draw()
-#                 hists[shuntMult][2][0].Draw()
-#                 c1.cd(4)
-#                 hists[1][3][0].Draw()
-#                 hists[shuntMult][3][0].Draw()
-#                 c1.SaveAs(outputDirectory+"Slopes_%s.pdf"%str(uniqueID).replace(" ","_"))
-
-#                 c1.cd(1)
-#                 hists[1][0][1].Draw()
-#                 hists[shuntMult][0][1].Draw()
-#                 c1.cd(2)
-#                 hists[1][1][1].Draw()
-#                 hists[shuntMult][1][1].Draw()
-#                 c1.cd(3)
-#                 hists[1][2][1].Draw()
-#                 hists[shuntMult][2][1].Draw()
-#                 c1.cd(4)
-#                 hists[1][3][1].Draw()
-#                 hists[shuntMult][3][1].Draw()
-#                 c1.SaveAs(outputDirectory+"Offsets_%s.pdf"%str(uniqueID).replace(" ","_"))
 
 
 if __name__=="__main__":
@@ -184,4 +133,4 @@ if __name__=="__main__":
 
         graphParamDist(outFile)
 
-#graphParamDist("/home/hep/jmmans/chargy/hcal/hcalUHTR/Data_CalibrationScans/2016-08-03/Run_12/qieCalibrationParameters_0x38000000_0xea99a870.db")
+#	graphParamDist("/Users/titasroy/cmshcal11_github/Data/2016-08-04/Run_05/qieCalibrationParameters_0x86000000_0xead65570.db")
