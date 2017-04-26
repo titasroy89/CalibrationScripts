@@ -153,7 +153,9 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 y = graph.GetY()[n]
                                 if y > maxCharge: maxCharge = y
                                 if y < minCharge: minCharge = y
-                                _linADC, _linADCErr = linADC(graph.GetX()[n],graph.GetEX()[n])
+				#print "the issue is:",graph.GetX()[0]
+                                _linADC, _linADCErr = linADC((graph.GetX()[n]-.5),graph.GetEX()[n])
+
 #                               graph.GetX()[n] = _x
 #                               graph.GetEX()[n] = _ex
 
@@ -182,15 +184,16 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 #			print pedestal
 
                         if graph.GetN() > 1:
-				graph.Fit("pol1","","",200,9e9) 
-#				f1= TF1("f1","pol1",200,600);
-# 				if (i_range==0 and shuntMult==1):
-# 					graph.Fit("f1","R") 
-# 				else:
-# 					graph.Fit("f1","0") 				
+				#graph.Fit("pol1","","",200,9e9) 
+				#graph.Fit("pol1")
+				f1= TF1("f1","pol1",200,9e0);
+ 				if (i_range==0 and shuntMult==1):
+ 					graph.Fit("f1","R") 
+ 				else:
+ 					graph.Fit("f1","0") 				
                                 linearizedGraphList.append(graph)                                
-#                                 fitLine = graph.GetFunction("f1")
-				fitLine = graph.GetFunction("pol1")
+                                fitLine = graph.GetFunction("f1")
+#				fitLine = graph.GetFunction("pol1")
 
 # This will calculate the pedestal based on the result of the range 0 fit
 # 				if i_range==0:
@@ -301,7 +304,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 				if (i_range==0 and shuntMult==1):
 					 text = TPaveText(200 + (600-200)*.2, 200 - (200-50)*(.3),200 + (600-200)*.6,200-(200-50)*.1)
 				else:
-                                	text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
+                                	 text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
                                 text.SetFillColor(kWhite)
                                 text.SetFillStyle(8000)
                                 text.AddText("Slope =  %.4f +- %.4f ADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))

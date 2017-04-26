@@ -1,7 +1,9 @@
 from ROOT import *
 gROOT.SetBatch()
 #from scan_forHE import *
+import sqlite3 as lite
 from array import array
+from linearADC import *
 # from ROOT import *
 # gROOT.SetBatch()
 # c1 = TCanvas('c1', 'Plots', 1000, 500)
@@ -23,18 +25,43 @@ shunt_Val ={1:0,
             11:30,
             11.5:31}
 
-def read_histo_2d(file_in="trial.root",shuntMult = 1):
-
+def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardMap={}):
+	shuntVal = shunt_Val[shuntMult]
         result = {}
         tf = TFile(file_in, "READ")
-
+	rms={}
+	mean={}
+	conSlopes = lite.connect("Slopes_Offsets_new.db")        
         histNameScheme = tf.GetListOfKeys()[9].GetName().split('_')
         histNameStart = histNameScheme[0]+'_'+histNameScheme[1]
 
-        shuntVal = shunt_Val[shuntMult]
-
+	adcDist={}
         results = {}
-        for i_qieRange in range(4):
+	chargeBins={}
+	charge={}
+	histo_={}
+	histo_charge={}
+	if shuntMult == 1:
+            qieRange = range(4)
+    	else :
+            qieRange = range(2)
+        for i_qieRange in qieRange:
+		if i_qieRange == 0 and shuntMult==1:
+			 highCurrent = False
+        	else:
+                	highCurrent = True
+       		print "Now on shunt %.1f and range %i"%(shuntMult,i_qieRange)
+        	if highCurrent:
+                	print "Using high-current mode"
+        	else:
+                	print "Using low-current mode"
+		rms[i_qieRange]={}
+		mean[i_qieRange]={}
+                chargeBins[i_qieRange]={}
+		charge[i_qieRange]={}
+		histo_[i_qieRange]={}
+		histo_charge[i_qieRange]={}
+		adcDist[i_qieRange]={}
                 if shuntVal > 0 and i_qieRange==3: continue
                 results[i_qieRange] = {}
                 rangeADCoffset = i_qieRange*64.
@@ -42,52 +69,108 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1):
                         goodLink = True
                         for i_channel in range(6):
                                 histName = "%s_f%i_c%i_r%i_s%i"%(histNameStart, i_link, i_channel, i_qieRange, shuntVal)
-                                #print histName
+				#print "%s_f%i_c%i_r%i_s%i"%(histNameStart, i_link, i_channel, i_qieRange, shuntVal)
                                 hist = tf.Get(histName)
                                 if type(hist)==type(TObject()):
                                         goodLink = False
                                         break
+				histBins = hist.GetNbinsX()
                                 histNum = 6*i_link + i_channel
+				ih = 6*i_link + i_channel
+				channel = (ih % 12 + 1)
+				backplane_slotNum = linkMap[i_link]['slot']
+				
+				if not backplane_slotNum in injectionCardMap:
+					 print 'backplane slot not mapped to charge injection card!!!'
+					 sys.exit()
+				injectioncard = injectionCardMap[backplane_slotNum][0]
+				dac = injectionCardMap[backplane_slotNum][1]
                                 results[i_qieRange][histNum] = {}
-                                #DAC_val =array('d')
+				rms[i_qieRange][histNum]={}
+                		mean[i_qieRange][histNum]={}
+				chargeBins[i_qieRange][histNum]=array('d')
+				charge[i_qieRange][histNum]=array('d')
+				linADCBins=array('d')
+				for i in range(i_qieRange*64,(i_qieRange+1)*64):
+    					linADCBins.append(linADC(i-.5)[0])
+				DACBins=array('d')
                                 for i_bin in range(1,hist.GetNbinsX()+1):
+					hist.GetXaxis().SetRange(i_bin,i_bin)
+					DACBins.append(int(hist.GetXaxis().GetBinLowEdge(i_bin)))
                                         
 
                                         hist.GetXaxis().SetRange(i_bin,i_bin)
                                         dacVal = int(hist.GetXaxis().GetBinLowEdge(i_bin))
-                                       # DAC_val.append(dacVal)
-                                #        print DAC_val
-#                                         print "range_%i_dac_%i"%(i_qieRange,dacVal)
+					
 
                                         info = {}
                                         info["link"] = i_link
                                         info["channel"] = i_channel
                                         info["mean"] = []
                                         info["rms"] = []
-                                        
+                                        bincontents=[]
                                         for i_capID in range(4):
                                                 offset = 64*(i_capID)
                                                 hist.GetYaxis().SetRangeUser(offset, offset+63.5)
                                                 info["mean"].append(hist.GetMean(2)-offset+rangeADCoffset)
                                                 info["rms"].append(max(hist.GetRMS(2), 0.01))
                                         results[i_qieRange][histNum][dacVal] = info
+				cursor = conSlopes.cursor()		
+				charge_=[]	
+				for dacvalue in DACBins:
+				#	print dacvalue
+					if dacvalue > 48000: continue
+					query = ( injectioncard, int(dac), channel, int(highCurrent), dacvalue, dacvalue)
+					#get QI slopes and offsets from .db file
+					cursor.execute('SELECT offset, slope FROM CARDCAL WHERE card=? AND dac=? AND channel=? AND highcurrent=? AND rangelow<=? AND rangehigh>=?', query )
+					result_t = cursor.fetchone()
+	
+					offset = result_t[0]
+					slope = result_t[1]
+
+					current = dacvalue*slope + offset
+					chargeq = current*25e6
+					chargeBins[i_qieRange][histNum].append(-1.*chargeq)
+
+				
+				
+				histo_[i_qieRange][histNum]={}
+				histo_charge[i_qieRange][histNum]={}
+				adcDist[i_qieRange][histNum]={}
+				for i_capID in range(4):
+					
+#					print len(linADCBins)-1
+#					print len(linADCBins)
+#					
+#					print len(DACBins)-1
+#					print len(DACBins)
+					#if i_qieRange>=1:
+					#	print chargeBins[i_qieRange][histNum]								
+	
+					histo_[i_qieRange][histNum][i_capID] = TH2F("histo_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),"histo_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),len(DACBins)-1,DACBins, len(linADCBins)-1, linADCBins)
+
+					histo_charge[i_qieRange][histNum][i_capID]=TH2F("histocharge_fC_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),"histocharge_fC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),len(chargeBins[i_qieRange][histNum])-1,chargeBins[i_qieRange][histNum], len(linADCBins)-1, linADCBins)
+				#	print i_qieRange, histNum, i_capID, shuntMult
+					for ix in range(1,hist.GetNbinsX()+1):
+						for iy in range(1,64):
+							histo_[i_qieRange][histNum][i_capID].SetBinContent(ix,iy,hist.GetBinContent(ix,iy+i_capID*64))
+							histo_charge[i_qieRange][histNum][i_capID].SetBinContent(ix,iy,hist.GetBinContent(ix,iy+i_capID*64))
+					for ix in range(1,hist.GetNbinsX()+1):	
+						charge[i_qieRange][histNum].append(float(chargeBins[i_qieRange][histNum][ix-1]))
+				
+						rms[i_qieRange][histNum][i_capID]=array('d')
+						mean[i_qieRange][histNum][i_capID]=array('d')
+						adcDist[i_qieRange][histNum][i_capID] = histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)
+					#	mean[i_qieRange][histNum][i_capID].append( adcDist[i_qieRange][histNum][i_capID].GetMean())
+						mean[i_qieRange][histNum][i_capID].append(float( histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)))
+
+						rms[i_qieRange][histNum][i_capID].append( adcDist[i_qieRange][histNum][i_capID].GetRMS())
+						
+					
+			
 
                         if not goodLink: continue
                                         
         tf.Close()
                                 
-        return results#DAC_val
-
-# f = read_histo_2d(file_in="/home/hep/jmmans/chargy/hcal/hcalUHTR/Data_CalibrationScans/2016-07-26/Run_15/QIECalibration_2.root",shuntMult = 8.0)
-# dac= f[0][90].keys()
-# dac.sort()
-# print dac
-# #i_range = f.keys()
-# #i_range.sort()
-# #mean=f[0][0][320]['mean'][0]
-# #print mean
-# #channel = f[0].keys()
-# #channel.sort()
-# #print channel
-# #for i in range(len(dac)):
-#  #   print dac[i]
+        return results, mean, rms, charge

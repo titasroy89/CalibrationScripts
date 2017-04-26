@@ -8,7 +8,8 @@ import os
 import string
 import sqlite3 as lite
 import csv
-
+from linearADC import *
+from read_histo_2d import *
 
 gROOT.SetBatch(kTRUE)
 nominalMapping = { 1 : 4,
@@ -23,109 +24,44 @@ nominalMapping = { 1 : 4,
 
 
 
-def makeADCvsfCgraphSepCapID(values, histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
+def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
 
-    conSlopes = lite.connect("Slopes_Offsets_new.db")
    
 
     print 'Making TGraphs from histos'
-
-
+    
+    print mean
     graphs = {}
-    graphs_2={}
     i_range=qieRange
     if shuntMult == 1:
             qierange = range(4)
     else :
             qierange = range(2)
-    #print "Going over ranges ",qierange
-    #for i_range in qierange:
     if i_range > 0 or shuntMult>1:
         highCurrent = True
     else:
         highCurrent = False
-    print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
-    if highCurrent:
-        print "Using high-current mode"
-    else:
-        print "Using low-current mode"
-#    print highCurrent
-    #print values
     lsbList = values[histo_list[0]].keys()
     lsbList.sort()
-#    print "dac values for this combination",lsbList
-#    print histo_list
     for ih in histo_list:
-            QIE_values = []
-        #    print "Now on shunt %.1f and range %i"%(shuntMult,i_range)
-
-            channel = (ih % 12 + 1)
-#            print "ih",ih
-            linkNum = int(ih/6)
-
-            backplane_slotNum = linkMap[linkNum]['slot']
-
-            if not backplane_slotNum in injectionCardMap:
-                print 'backplane slot not mapped to charge injection card!!!'
-                sys.exit()
-
-            injectioncard = injectionCardMap[backplane_slotNum][0]
-            dac = injectionCardMap[backplane_slotNum][1]
-        
-        
-            cur_Slopes = conSlopes.cursor()
-
-            for i_lsb in lsbList:
-        
-                if i_lsb> 48000: continue
-                query = ( injectioncard, int(dac), channel, int(highCurrent), i_lsb, i_lsb)
-                cur_Slopes.execute('SELECT offset, slope FROM CARDCAL WHERE card=? AND dac=? AND channel=? AND highcurrent=? AND rangelow<=? AND rangehigh>=?', query )
-                result_t = cur_Slopes.fetchone()
-
-                offset = result_t[0]
-                slope = result_t[1]
-                
-
-                current = i_lsb*slope + offset
-                charge = current*25e6
-                
-                mean_ = []
-                rms_ = []
-                for i_capID in range(4):
-                    #print"range %i ih %i and i_lsb %i "%(i_range,ih,i_lsb)
-                    #print values[ih][i_lsb]['mean'][i_capID]
-                    mean_.append(values[ih][i_lsb]['mean'][i_capID])
-                    rms_.append(values[ih][i_lsb]['rms'][i_capID])
-                QIE_values.append([i_lsb,-1*charge,mean_,rms_])
-
-            QIE_values.sort()
-            #print QIE_values
-            #print "ih is %i and range is %i"%(ih,i_range)
-            # graphs={}
-            graphs[ih] = []
-            #ADCvsfC = []
-            for i_capID in range(4):
-                adcerr_array_new = array('d')
-                fc_array_div = array('d')
-                fc_array = array('d',[b[1] for b in QIE_values])
-                for i in fc_array:
-                    fc_array_div.append(i/shuntMult)
-                #fc_array = array('d',[b[2] for b in QIE_values])
-                fCerror_array = array('d',[0]*len(fc_array))
-                adc_array = array('d',[b[2][i_capID] for b in QIE_values])
-                #adc_array = array('d',[b[3][i_capID] for b in QIE_values])
-                adcerr_array = array('d',[b[3][i_capID] for b in QIE_values])
-                myInt = 84.
-                for i in adcerr_array:
-                    adcerr_array_new.append(i/myInt)
-                    
-                ADCvsfC=TGraphErrors(len(fc_array),adc_array,fc_array,adcerr_array_new,fCerror_array)
-                ### Change the name, removing the decimal from the shuntmult (replacing it separated with an underscore) to make it openable in root command line
-                ADCvsfC.SetNameTitle("ADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID),"ADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID))
-
-                graphs[ih].append(ADCvsfC)
+           # for i_lsb in lsbList:
+		channel = (ih % 12 + 1)        
+	    	
+	
+		_charge = array("d",charge[i_range][ih][:-1])
+		_chargeErr = array("d",[0 for i in range(len(charge[i_range][ih][:-1]))])
+		#for i_capID in range(4):
+		#	_mean.append(array("d",mean[i_range][ih][i_capID]))
+		#	_rms.append(array("d",rms[i_range][ih][i_capID]))
+		graphs[ih] = []	
+                for i_capID in range(4):   
+			
+		
+                	ADCvsfC=(TGraphErrors(len(mean[i_range][ih][i_capID]),_charge,mean[i_range][ih][i_capID],_chargeErr,rms[i_range][ih][i_capID]))
+                	ADCvsfC.SetNameTitle("LinADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID),"LinADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID))
+			
+                	graphs[ih].append(ADCvsfC)
          
-   #                graphs_2[i_range]=graphs[ih]
     return graphs
 
     

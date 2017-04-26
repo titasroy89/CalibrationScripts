@@ -104,7 +104,7 @@ def getValuesFromFile(outputDir):
         return linkMap, injectionCardMap 
                 
 
-def ShuntScan(shuntMult=1, outputDirectory = '', ):
+def ShuntScan(shuntMult=1, outputDirectory = '', linkMap={},injectionCardMap={}):
          files = os.listdir(outputDirectory)
 	 final_file = ''
 	 for f in files:
@@ -114,11 +114,14 @@ def ShuntScan(shuntMult=1, outputDirectory = '', ):
 		print 'Unable to find data file in directory %s'%outputDirectory
 		print 'Exiting'
 		sys.exit()
-	 
          #final_file = outputDirectory+'QIECalibration_1.root'
-         val= read_histo_2d(file_in=final_file,shuntMult=shuntMult)
 
-         return val
+	 linkMap, injectionCardMap = getValuesFromFile(outputDirectory)
+
+         linkMap, injectionCardMap = getValuesFromFile(outputDirectory)
+         val, mean, rms, charge= read_histo_2d(file_in=final_file,shuntMult=shuntMult,linkMap=linkMap, injectionCardMap=injectionCardMap)
+	 
+         return val, mean, rms, charge
 
 def QIECalibrationScan(options):
 
@@ -141,7 +144,7 @@ def QIECalibrationScan(options):
 
 
         linkMap, injectionCardMap = getValuesFromFile(outputDirectory)
-
+	#print linkMap[0]['slot']
 
         simpleCardMap = fakesimpleCardMap
 
@@ -222,8 +225,9 @@ def QIECalibrationScan(options):
         for shuntMult in shuntMult_list:
                 output={}
                 shuntOutputDirectory = outputDirectory #+ "Data_%s_%s/"%(rangeMode, shuntMode)
-                vals = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
-		pedestal_graphs_shunt[shuntMult] = makeADCvsfCgraphSepCapID(vals[0],histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=0,shuntMult=shuntMult)
+                vals, mean, rms, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory, linkMap=linkMap,injectionCardMap=injectionCardMap)
+		
+		pedestal_graphs_shunt[shuntMult] = makeADCvsfCgraphSepCapID(vals[0],mean, rms, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=0,shuntMult=shuntMult)
 
 	dirStructure = outputDirectory.split('/')
 	for value in dirStructure:
@@ -248,7 +252,7 @@ def QIECalibrationScan(options):
                 output={}
                 print "Now on shuntMult %.1f"%shuntMult
                 shuntOutputDirectory = outputDirectory #+ "Data_%s_%s/"%(rangeMode, shuntMode)
-                vals = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
+                vals, mean, rms, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
                 print "this is:",outputDirectory
                 if shuntMult == 1:
 			qieRange= range(4)
@@ -259,7 +263,7 @@ def QIECalibrationScan(options):
 			histoList =  vals[i_range].keys()
 			histoList.sort()
             #print "now",histoList
-			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
+			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],mean, rms, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
                    #    print "Now printing out put from adcTofC"            
                         #print graphs_shunt
 

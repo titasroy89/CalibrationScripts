@@ -3,42 +3,23 @@ from linearADC import *
 import os
 from array import array
 
+
 bin0startLevel = -0.5
 
-def linearizeGraph(graph, i_range):
+def CleanGraph(graph, i_range):
     vOffset = i_range*64
     points = range(graph.GetN())
+     
     points.reverse()
-    removeRest = False
-    graph.SetNameTitle(graph.GetName().replace("ADC","linADC"),graph.GetName().replace("ADC","linADC"))
+    print points
+   # removeRest = False
 
     for n in points:
-        x = graph.GetX()[n]-vOffset
-        if x<1 or x>62:
-            graph.RemovePoint(n)
-            continue
+	print graph.GetY()[n]
+        if graph.GetY()[n] < 1 or graph.GetY()[n]>linADC(62)[0]:
+	#	print graph.GetY()[n]
+            	graph.RemovePoint(n)
 
-#         if x>62:
-#             graph.RemovePoint(n)
-#             continue
-#         if n==0:
-#             graph.RemovePoint(n)
-#             continue
-
-#         if x < 1:
-#             removeRest=True
-
-#         if removeRest:
-#             graph.RemovePoint(n)
-#             continue
-
-        _linADC, _linADCErr = linADC(graph.GetX()[n],graph.GetEX()[n])
-        _charge = graph.GetY()[n]
-        _chargeErr = graph.GetEY()[n]
-        graph.GetX()[n] = _charge
-        graph.GetEX()[n] = _chargeErr
-        graph.GetY()[n] = _linADC
-        graph.GetEY()[n] = _linADCErr
     if i_range==0:
         graph.RemovePoint(0)
     return graph
@@ -61,12 +42,12 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
     for ih in histoList:
         _file.mkdir("h%i"%ih)
         _file.cd("h%i"%ih)
-        print ih
-        #get low current
+        #print ih
+        
         lowCurrentPeds = []
         for i_capID in range(4):
-            #linearize the graph first 
-            graph = linearizeGraph(graphs_shunt[1.0][ih][i_capID],0)
+            #remove lower and upper ends of ADC to make it clean
+            graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
             print graph.GetName()
             graph.Fit("pol1","0")
             line = graph.GetFunction("pol1")
@@ -83,7 +64,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
                 continue
             highCurrentShuntPeds[i_shunt]=[]
             for i_capID in range(4):
-                graph = linearizeGraph(graphs_shunt[i_shunt][ih][i_capID],0)
+                graph = CleanGraph(graphs_shunt[i_shunt][ih][i_capID],0)
                 graph.Fit("pol1","0")
                 graph.Write()
                 line = graph.GetFunction("pol1")
