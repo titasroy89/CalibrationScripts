@@ -7,7 +7,12 @@ minMult_range = [0,3,6,9]
 
 def linADC(adc, adc_rms = 0):
     if adc > 255: adc = 255
-    irange = int(adc) >> 6
+   # irange = int(adc) >> 6
+#    irange = int(round(adc))>>6
+    irange = 0
+    if adc > 63.499: irange = 1
+    if adc > 127.499: irange = 2
+    if adc > 191.499: irange = 3
 
     minval = minval_range[irange]
     mult = minMult_range[irange]
