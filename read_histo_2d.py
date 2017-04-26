@@ -161,8 +161,8 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 						rms[i_qieRange][histNum][i_capID]=array('d')
 						mean[i_qieRange][histNum][i_capID]=array('d')
 						adcDist[i_qieRange][histNum][i_capID] = histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)
-					#	mean[i_qieRange][histNum][i_capID].append( adcDist[i_qieRange][histNum][i_capID].GetMean())
-						mean[i_qieRange][histNum][i_capID].append(float( histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)))
+						mean[i_qieRange][histNum][i_capID].append( adcDist[i_qieRange][histNum][i_capID].GetMean())
+					#	mean[i_qieRange][histNum][i_capID].append(float( histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)))
 
 						rms[i_qieRange][histNum][i_capID].append( adcDist[i_qieRange][histNum][i_capID].GetRMS())
 						
