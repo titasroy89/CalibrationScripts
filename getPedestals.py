@@ -11,11 +11,11 @@ def CleanGraph(graph, i_range):
     points = range(graph.GetN())
      
     points.reverse()
-    print points
+#    print points
    # removeRest = False
 
     for n in points:
-	print graph.GetY()[n]
+#	print graph.GetY()[n]
         if graph.GetY()[n] < 1 or graph.GetY()[n]>linADC(62)[0]:
 	#	print graph.GetY()[n]
             	graph.RemovePoint(n)

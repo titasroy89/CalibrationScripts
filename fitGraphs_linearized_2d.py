@@ -98,81 +98,40 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                         nominalgraph =  graphs[i_capID]
 			print nominalgraph.GetName()
                         if shuntMult == 1:
-#                                nominalgraph.SetNameTitle('%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)),'%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)))
                                 outputTGraphs.cd("adcVsCharge")
                         else:
-#                                nominalgraph.SetNameTitle('%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)),'%s_range_%i_shunt_%i_%i'%(nominalgraph.GetName(),i_range,int(shuntMult),int(shuntMult%1*10)))
                                 outputTGraphs.cd("Shunted_adcVsCharge")
                         nominalgraph.Write()
                         graph = nominalgraph.Clone("%s_linearized"%nominalgraph.GetName())
                         graph.SetNameTitle("%s_linearized"%nominalgraph.GetName(),"%s_linearized"%nominalgraph.GetName())
-#                       nominalgraph.Write()
-#                         if i_range==0:
-#                                 for n in range(graph.GetN()):					
-#                                         if graph.GetX()[n]>2:
-#                                                 x1 = graph.GetX()[n+1]
-#                                                 y1 = graph.GetY()[n+1]
-#                                                 x2 = graph.GetX()[n+4]
-#                                                 y2 = graph.GetY()[n+4]
-# 						if x2 >15:
-# 							x2 = graph.GetX()[n+3]
-# 							y2 = graph.GetY()[n+3]
-# 							if x2 >15:
-# 								x2 = graph.GetX()[n+2]
-# 								y2 = graph.GetY()[n+2]
-
-# 						if not x2 > x1: continue
-# 						if not x1 > 2: continue
-							
-# 						print graph.GetX()[n], x1, y1, x2, y2
-
-#                                                 if x1==x2: 
-# 							continue
-# #							pedestal.append(0)
-# #                                                        pedestal[i_capID]=0
-#                                                 else:
-#                                                         m = (y2-y1)/(x2-x1)                                             
-# #							pedestal.append(y1 - m*x1)
-#                                                         pedestal[i_capID] = y1 - m*x1
-#                                                 break
 
                         points = range(graph.GetN())
                         points.reverse()
                         maxCharge = -9e9
                         minCharge = 9e9
-                        for n in points:
-                                x = graph.GetX()[n]-vOffset
-                                nominalgraph.GetY()[n] -= pedestal[i_capID]
-                                graph.GetY()[n] -= pedestal[i_capID]
+                        for p in points:
+                                x = graph.GetX()[p]-vOffset
+                                nominalgraph.GetX()[p] -= pedestal[i_capID]
+                                graph.GetX()[p] -= pedestal[i_capID]
+				if i_range==0:
+                                        if graph.GetY()[p] < 1 or graph.GetY()[p] >linADC(62)[0]:
+                                                 graph.RemovePoint(p)
+                                if i_range==1:
+                                        if graph.GetY()[p] < linADC(64)[0] or graph.GetY()[p] >linADC(126)[0]:
+                                                 graph.RemovePoint(p)
+                                if i_range==2:
+                                        if graph.GetY()[p] < linADC(128)[0] or graph.GetY()[p] >linADC(190)[0]:
+                                                graph.RemovePoint(p)
+                                if i_range==3:
+                                        if graph.GetY()[p] < linADC(192)[0] or graph.GetY()[p] >linADC(254)[0]:
+                                                graph.RemovePoint(p)
+				if graph.GetX()[p] < 0:graph.RemovePoint(p)
+                        if i_range==0:graph.RemovePoint(0)
 
-                                if x<1 or x>62:
-                                        graph.RemovePoint(n)
-                                        continue
 
-
-                                y = graph.GetY()[n]
-                                if y > maxCharge: maxCharge = y
-                                if y < minCharge: minCharge = y
-				#print "the issue is:",graph.GetX()[0]
-                                _linADC, _linADCErr = linADC((graph.GetX()[n]-.5),graph.GetEX()[n])
-
-#                               graph.GetX()[n] = _x
-#                               graph.GetEX()[n] = _ex
-
-#                               x = graph.GetX()[n]
-#                               ex = graph.GetEX()[n]
-                                _charge = graph.GetY()[n]
-                                _chargeErr = graph.GetEY()[n]
-                                graph.GetX()[n] = _charge
-                                graph.GetEX()[n] = _chargeErr
-                                graph.GetY()[n] = _linADC
-                                graph.GetEY()[n] = _linADCErr
-			if i_range==0:
-				graph.RemovePoint(0)
-# 				if (shuntMult ==1):
-# 					graph.GetXaxis().SetRangeUser(200,600)
-# 					graph.GetYaxis().SetRangeUser(50,200)
                         graph.GetXaxis().SetTitle("Charge (fC)")
+			if i_range==0 and shuntMult==1:
+				graph.GetXaxis().SetLimits(200,600)
                         graph.GetYaxis().SetTitle("Linearized ADC")
 
                         if shuntMult == 1: 
@@ -184,20 +143,16 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 #			print pedestal
 
                         if graph.GetN() > 1:
+				print graph.GetN()
 				#graph.Fit("pol1","","",200,9e9) 
 				#graph.Fit("pol1")
-				f1= TF1("f1","pol1",200,9e0);
+				f1= TF1("f1","pol1",200,600);
  				if (i_range==0 and shuntMult==1):
  					graph.Fit("f1","R") 
  				else:
  					graph.Fit("f1","0") 				
                                 linearizedGraphList.append(graph)                                
                                 fitLine = graph.GetFunction("f1")
-#				fitLine = graph.GetFunction("pol1")
-
-# This will calculate the pedestal based on the result of the range 0 fit
-# 				if i_range==0:
-# 					pedestal[i_capID] = -1*fitLine.GetParameter(0)/fitLine.GetParameter(1)
 
                                 fitLine.SetNameTitle("fit_%s"%graph.GetName(),"fit_%s"%graph.GetName())
                                 fitLines[-1].append(fitLine)
@@ -229,7 +184,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 saveName += qieUniqueID
                                 if not os.path.exists(saveName):
                                         os.system("mkdir -p %s"%saveName)
-                                saveName += "/LinADCvsfC"
+                                saveName += "/Lingraph"
                                 if qieNumber != 0: 
                                         qieInfo += ", QIE " + str(qieNumber)
                                         saveName += "_qie"+str(qieNumber)
@@ -282,8 +237,8 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 
                                 residualGraphX.SetTitle("")
                                 c1 = TCanvas()
-                                p1 = TPad("","",0,.2,.9,1)
-                                p2 = TPad("","",0,0,.9,.2)
+                                p1 = TPad("","",0,0.2,0.9,1)
+                                p2 = TPad("","",0,0,0.9,0.2)
                                 p1.Draw()
                                 p2.Draw()
                                 p1.SetFillColor(kWhite)
@@ -292,6 +247,8 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 p1.cd()
                                 p1.SetBottomMargin(0)
                                 p1.SetRightMargin(0)
+			#	p2.SetTopMargin(0)
+			#	p2.SetBottomMargin(0.3)
                                 graph.Draw("ap")
                                 fitLine.SetLineColor(kRed)
                                 fitLine.SetLineWidth(2)
@@ -306,6 +263,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 				else:
                                 	 text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
                                 text.SetFillColor(kWhite)
+				text.SetTextSize(0.75*text.GetTextSize())
                                 text.SetFillStyle(8000)
                                 text.AddText("Slope =  %.4f +- %.4f ADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))
                                 text.AddText("Offset =  %.2f +- %.2f ADC" % (fitLine.GetParameter(0), fitLine.GetParError(0)))
