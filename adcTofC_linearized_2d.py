@@ -54,18 +54,25 @@ def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), 
 		for i_capID in range(4):		
                 	ADCvsfC=(TGraphErrors(len(mean[i_range][ih][i_capID]),_charge,mean[i_range][ih][i_capID],_chargeErr,rms[i_range][ih][i_capID]))
                 	ADCvsfC.SetNameTitle("LinADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID),"LinADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID))
-			for p in range(ADCvsfC.GetN()):
+			points = range(ADCvsfC.GetN())
+			points.reverse()
+			for p in points:
+			#	print "points are:",points
+			
 				 if i_range==0:
-				 	if ADCvsfC.GetY()[p] < 1 or ADCvsfC.GetY()[p] >linADC(62)[0]:
+				#	print "points are:",points
+				 	if (ADCvsfC.GetY()[p] < 1 or ADCvsfC.GetY()[p] >linADC(62)[0]):
 						 ADCvsfC.RemovePoint(p)
+					if  (ADCvsfC.GetY()[p+1] <  ADCvsfC.GetY()[p]): 
+						 ADCvsfC.RemovePoint(p+1)
 				 if i_range==1:
-					if ADCvsfC.GetY()[p] < linADC(64)[0] or ADCvsfC.GetY()[p] >linADC(126)[0]:
+					if (ADCvsfC.GetY()[p] < linADC(64)[0] or ADCvsfC.GetY()[p] >linADC(126)[0]):
 						 ADCvsfC.RemovePoint(p)
 				 if i_range==2:
-					if ADCvsfC.GetY()[p] < linADC(128)[0] or ADCvsfC.GetY()[p] >linADC(190)[0]:
+					if (ADCvsfC.GetY()[p] < linADC(128)[0] or ADCvsfC.GetY()[p] >linADC(190)[0]):
 						ADCvsfC.RemovePoint(p)
 				 if i_range==3:
-					if ADCvsfC.GetY()[p] < linADC(192)[0] or ADCvsfC.GetY()[p] >linADC(254)[0]:
+					if (ADCvsfC.GetY()[p] < linADC(192)[0] or ADCvsfC.GetY()[p] >linADC(254)[0]):
 						ADCvsfC.RemovePoint(p)
 				 if ADCvsfC.GetX()[p] < 0:
 					 ADCvsfC.RemovePoint(p)
