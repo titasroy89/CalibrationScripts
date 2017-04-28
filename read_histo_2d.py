@@ -137,15 +137,19 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 				histo_[i_qieRange][histNum]={}
 				histo_charge[i_qieRange][histNum]={}
 				adcDist[i_qieRange][histNum]={}
+				linADCBins_= array('d',sorted(linADCBins))
+				_linADCBins=array('d')
+				for i in linADCBins_:
+					if i not in _linADCBins:
+						_linADCBins.append(i)				
 				for i_capID in range(4):
 					
 #					print len(linADCBins)-1
-#					print len(linADCBins)
 #					
 #					print len(DACBins)-1
 #					print len(DACBins)
 					#if i_qieRange>=1:
-					#	print chargeBins[i_qieRange][histNum]								
+					#	print linADCBins		
 	
 					histo_[i_qieRange][histNum][i_capID] = TH2F("histo_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),"histo_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),len(DACBins)-1,DACBins, len(linADCBins)-1, linADCBins)
 
@@ -155,12 +159,21 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 						for iy in range(1,64):
 							histo_[i_qieRange][histNum][i_capID].SetBinContent(ix,iy,hist.GetBinContent(ix,iy+i_capID*64))
 							histo_charge[i_qieRange][histNum][i_capID].SetBinContent(ix,iy,hist.GetBinContent(ix,iy+i_capID*64))
+					rms[i_qieRange][histNum][i_capID]=array('d')
+					mean[i_qieRange][histNum][i_capID]=array('d')
 					for ix in range(1,hist.GetNbinsX()+1):	
 						charge[i_qieRange][histNum].append(float(chargeBins[i_qieRange][histNum][ix-1]))
 				
-						rms[i_qieRange][histNum][i_capID]=array('d')
-						mean[i_qieRange][histNum][i_capID]=array('d')
 						adcDist[i_qieRange][histNum][i_capID] = histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)
+						if i_qieRange==0:
+							if adcDist[i_qieRange][histNum][i_capID].GetMean() <1 or adcDist[i_qieRange][histNum][i_capID].GetMean() >linADC(62)[0]:continue
+						if i_qieRange==1:
+							if adcDist[i_qieRange][histNum][i_capID].GetMean() < linADC(64)[0] or adcDist[i_qieRange][histNum][i_capID].GetMean() >linADC(124)[0]:continue
+						if i_qieRange==2:
+							if adcDist[i_qieRange][histNum][i_capID].GetMean() <linADC(128)[0] or adcDist[i_qieRange][histNum][i_capID].GetMean() >linADC(191)[0]:continue
+						if i_qieRange==3:
+							
+							if adcDist[i_qieRange][histNum][i_capID].GetMean() <linADC(191)[0] or adcDist[i_qieRange][histNum][i_capID].GetMean() >linADC(254)[0]:continue
 						mean[i_qieRange][histNum][i_capID].append( adcDist[i_qieRange][histNum][i_capID].GetMean())
 					#	mean[i_qieRange][histNum][i_capID].append(float( histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)))
 
