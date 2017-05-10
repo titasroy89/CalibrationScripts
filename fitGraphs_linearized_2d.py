@@ -111,9 +111,12 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                         minCharge = 9e9
                         for p in points:
                                 x = graph.GetX()[p]-vOffset
-                                nominalgraph.GetX()[p] -= pedestal[i_capID]
-                                graph.GetX()[p] -= pedestal[i_capID]
+				if graph.GetY()[p+1] <= graph.GetY()[p]:
+					 graph.RemovePoint(p+1)
+					 nominalgraph.RemovePoint(p) 
 				if i_range==0:
+					graph.RemovePoint(0)
+					nominalgraph.RemovePoint(p)
                                         if graph.GetY()[p] < 1 or graph.GetY()[p] >linADC(62)[0]:
                                                  graph.RemovePoint(p)
 						 nominalgraph.RemovePoint(p)
@@ -132,9 +135,8 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 				if graph.GetX()[p] < 0:
 					graph.RemovePoint(p)
 					nominalgraph.RemovePoint(p)
-                        if i_range==0:
-				graph.RemovePoint(0)
-				nominalgraph.RemovePoint(p)
+				nominalgraph.GetX()[p] -= pedestal[i_capID]
+				graph.GetX()[p] -= pedestal[i_capID]
 
 
                         graph.GetXaxis().SetTitle("Charge (fC)")
@@ -152,9 +154,9 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 
                         if graph.GetN() > 1:
 				print graph.GetN()
-				f1= TF1("f1","pol1");
+				f1= TF1("f1","pol1",200,600);
  				if (i_range==0 and shuntMult==1):
- 					graph.Fit("f1","0") 
+ 					graph.Fit("f1","R") 
  				else:
  					graph.Fit("f1","0") 				
                                 linearizedGraphList.append(graph)                                
@@ -204,7 +206,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 graph.GetYaxis().SetTitle("Lin ADC")
                                 graph.GetYaxis().SetTitleOffset(1.2)
                                 graph.GetXaxis().SetTitle("Charge fC")
-			#	if i_range==0:
+			#	if i_range==0 and shuntMult==1:
 			#		graph.GetXaxis().SetRangeUser(200,600)
 
                                 xVals = graph.GetX()
@@ -271,9 +273,9 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 			#	if (i_range==0 and shuntMult==1):
 			#		 text = TPaveText(200 + (600-200)*.2, 200 - (200-50)*(.3),200 + (600-200)*.6,200-(200-50)*.1)
 			#	else:
-                                text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
+                        	text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
                                 text.SetFillColor(kWhite)
-				text.SetTextSize(0.75*text.GetTextSize())
+				text.SetTextSize(0.65*text.GetTextSize())
                                 text.SetFillStyle(8000)
                                 text.AddText("Slope =  %.4f +- %.4f ADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))
                                 text.AddText("Offset =  %.2f +- %.2f ADC" % (fitLine.GetParameter(0), fitLine.GetParError(0)))
@@ -301,7 +303,10 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 				#	 residualGraphX.GetXaxis().SetLimits(200, 600)
 				#else:
                                 residualGraphX.GetXaxis().SetLimits(xmin*0.9, xmax*1.1)
-                                residualGraphX.GetYaxis().SetRangeUser(-0.03,0.03)
+				if (i_range==0 and shuntMult==1):
+					 residualGraphX.GetYaxis().SetRangeUser(-0.09,0.09)
+				else:
+                                	residualGraphX.GetYaxis().SetRangeUser(-0.04,0.04)
                                 residualGraphX.SetMarkerStyle(7)
                                 residualGraphX.GetYaxis().SetNdivisions(3,5,0)
 

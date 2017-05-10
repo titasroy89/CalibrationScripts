@@ -15,9 +15,7 @@ def CleanGraph(graph, i_range):
    # removeRest = False
 
     for n in points:
-#	print graph.GetY()[n]
         if graph.GetY()[n] < 1 or graph.GetY()[n]>linADC(62)[0]:
-	#	print graph.GetY()[n]
             	graph.RemovePoint(n)
 
     if i_range==0:
