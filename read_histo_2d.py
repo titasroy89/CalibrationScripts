@@ -1,14 +1,6 @@
 from ROOT import *
 gROOT.SetBatch()
-#from scan_forHE import *
 from array import array
-# from ROOT import *
-# gROOT.SetBatch()
-# c1 = TCanvas('c1', 'Plots', 1000, 500)
-# c1.SetFillColor(0)
-# c1.SetGrid()
-# c1.Clear()
-# c1.SetLogy()
 shunt_Val ={1:0,
             1.5:1,
             2:2,
@@ -76,7 +68,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1):
                                         
         tf.Close()
                                 
-        return results#DAC_val
+        return results
 
 # f = read_histo_2d(file_in="/home/hep/jmmans/chargy/hcal/hcalUHTR/Data_CalibrationScans/2016-07-26/Run_15/QIECalibration_2.root",shuntMult = 8.0)
 # dac= f[0][90].keys()
