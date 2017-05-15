@@ -14,14 +14,27 @@ def CleanGraph(graph, i_range):
 #    print points
    # removeRest = False
 
-    for n in points:
-#	print graph.GetY()[n]
-        if graph.GetY()[n] < 1 or graph.GetY()[n]>linADC(62)[0]:
-	#	print graph.GetY()[n]
-            	graph.RemovePoint(n)
+   # for p in points:
+#	if i_range==0:
+#		 if graph.GetY()[p] < 1 or graph.GetY()[p] >linADC(60)[0]:
+#			graph.RemovePoint(p)
+#	if i_range==1:
+ #                if graph.GetY()[p] < linADC(65)[0] or graph.GetY()[p] >linADC(120)[0]:
+  #                      graph.RemovePoint(p)
+                        #nominalgraph.RemovePoint(p)
+   #     if i_range==2:
+    #             if graph.GetY()[p] < linADC(128)[0] or graph.GetY()[p] >linADC(182)[0]:
+     #                   graph.RemovePoint(p)
+     #   if i_range==3:
+      #           if graph.GetY()[p] < linADC(192)[0] or graph.GetY()[p] >linADC(250)[0]:
+       #                 graph.RemovePoint(p)
+       # if graph.GetX()[p] < 0:
+        #         graph.RemovePoint(p)
+	
 
-    if i_range==0:
-        graph.RemovePoint(0)
+
+#    if i_range==0:
+ #       graph.RemovePoint(0)
     return graph
 
 
@@ -49,8 +62,11 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             #remove lower and upper ends of ADC to make it clean
             graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
             print graph.GetName()
-            graph.Fit("pol1","0")
-            line = graph.GetFunction("pol1")
+	    f1= TF1("f1","pol1",200,600);
+            graph.Fit("f1","R")
+	    
+            line = graph.GetFunction("f1")
+	    graph.GetXaxis().SetRange(200,600)
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
             lowCurrentPeds.append(-1*(line.GetParameter(0)-bin0startLevel)/line.GetParameter(1))
@@ -65,6 +81,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             highCurrentShuntPeds[i_shunt]=[]
             for i_capID in range(4):
                 graph = CleanGraph(graphs_shunt[i_shunt][ih][i_capID],0)
+		#f1= TF1("f1","pol1",200,600);
                 graph.Fit("pol1","0")
                 graph.Write()
                 line = graph.GetFunction("pol1")
