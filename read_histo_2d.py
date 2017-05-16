@@ -112,8 +112,8 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
                                         for i_capID in range(4):
                                                 offset = 64*(i_capID)
                                                 hist.GetYaxis().SetRangeUser(offset, offset+63.5)
-                                                info["mean"].append(hist.GetMean(2)-offset+rangeADCoffset)
-                                                info["rms"].append(max(hist.GetRMS(2), 0.01))
+                                               # info["mean"].append(hist.GetMean(2)-offset+rangeADCoffset)
+                                               # info["rms"].append(max(hist.GetRMS(2), 0.01))
                                         results[i_qieRange][histNum][dacVal] = info
 				cursor = conSlopes.cursor()		
 				charge_=[]	
@@ -132,7 +132,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 
 				
 				
-				histo_[i_qieRange][histNum]={}
+				#histo_[i_qieRange][histNum]={}
 				histo_charge[i_qieRange][histNum]={}
 				#adcDist[i_qieRange][histNum]={}
 				for i_capID in range(4):
@@ -148,9 +148,17 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 				
 						adcDist = histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)
 						mean[i_qieRange][histNum][i_capID].append(adcDist.GetMean())
-
-						rms[i_qieRange][histNum][i_capID].append( adcDist.GetRMS()/math.sqrt(12))
-						
+						N = adcDist.Integral()
+						if N==0:continue
+					#	print adcDist.Integral()
+					#	if adcDist.GetRMS()==0:
+					#		 rms[i_qieRange][histNum][i_capID].append(1/math.sqrt(12*N))
+			
+					#	rms[i_qieRange][histNum][i_capID].append(adcDist.GetRMS()/math.sqrt(N))
+						rms[i_qieRange][histNum][i_capID].append(max(adcDist.GetRMS(),1/math.sqrt(12))/math.sqrt(N))
+					
+							
+					#print "Intgeral is :", adcDist.Integral()	
 					
 		
 

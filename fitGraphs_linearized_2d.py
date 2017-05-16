@@ -128,17 +128,18 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 
                         if graph.GetN() > 1:
 				print "TOTAL:",graph.GetN()
-				#f1= TF1("f1","pol1",200,600);
- 				#if (i_range==0 and shuntMult==1):
- 				#	graph.Fit("f1","R") 
- 				#else:
- 				#	graph.Fit("pol1","0") 
+			#	f1= TF1("f1","pol1",200,600);
+			#	f1.FixParameter(0,-0.5)
+ 			#	if (i_range==0 and shuntMult==1):
+ 			#		graph.Fit("f1","R0") 
+ 			#	else:
+ 			#		graph.Fit("pol1","0") 
 				graph.Fit("pol1","0")				
                                 linearizedGraphList.append(graph) 
 			#	if (i_range==0 and shuntMult==1):
 			#		fitLine = graph.GetFunction("f1")
 			#	else:                               
-                        	        #fitLine = graph.GetFunction("pol1")
+                        #	        fitLine = graph.GetFunction("pol1")
 				fitLine =  graph.GetFunction("pol1")
                                 fitLine.SetNameTitle("fit_%s"%graph.GetName(),"fit_%s"%graph.GetName())
                                 fitLines[-1].append(fitLine)
@@ -234,7 +235,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 			#	p2.SetBottomMargin(0.3)
                                 graph.Draw("ap")
                                 fitLine.SetLineColor(kRed)
-                                fitLine.SetLineWidth(2)
+                                fitLine.SetLineWidth(1)
                                 fitLine.Draw("same")
 
                                 xmin = graph.GetXaxis().GetXmin()
@@ -263,12 +264,14 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 # xmin = xmin-10
                                 # xmax = xmax+10
                                 if minCharge < 10: minCharge = -10
-				graph.GetXaxis().SetLimits(xmin*0.9, xmax*1.1)
-                                graph.GetYaxis().SetLimits(ymin*.9,ymax*1.1)
+				graph.GetXaxis().SetRangeUser(xmin*0.9, xmax*1.1)
+                                graph.GetYaxis().SetRangeUser(ymin*.9,ymax*1.1)
+				
                                 residualGraphX.GetXaxis().SetRangeUser(xmin*0.9, xmax*1.1)
                                 residualGraphX.GetYaxis().SetRangeUser(-0.1,0.1)
                                 residualGraphX.SetMarkerStyle(7)
                                 residualGraphX.GetYaxis().SetNdivisions(3,5,0)
+				
 
                                 residualGraphX.GetXaxis().SetLabelSize(0.15)
                                 residualGraphX.GetYaxis().SetLabelSize(0.15)

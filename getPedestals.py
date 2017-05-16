@@ -38,9 +38,9 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
             print graph.GetName()
 	    f1= TF1("f1","pol1",200,600);
-            #graph.Fit("f1","R")
-	    graph.Fit("pol1","0")
-            line = graph.GetFunction("pol1")
+            #graph.Fit("f1","0")
+	    graph.Fit("f1","0")
+            line = graph.GetFunction("f1")
 	   # graph.GetXaxis().SetRangeUser(200,600)
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
