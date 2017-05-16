@@ -3,7 +3,7 @@ import sys
 import numpy
 from array import array
 import os
-
+import math
 from linearADC import *
 
 ####Change the fit to return slopes/offsets in terms of range 0 values for all ranges
@@ -116,10 +116,6 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 
 
                         graph.GetXaxis().SetTitle("Charge (fC)")
-			if i_range==0 and shuntMult==1:
-				graph.GetXaxis().SetLimits(200,600)
-			if i_range==1 and shuntMult==1:
-				graph.GetXaxis().SetLimits(500,5000)
                         graph.GetYaxis().SetTitle("Linearized ADC")
 
                         if shuntMult == 1: 
@@ -131,22 +127,19 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 #			print pedestal
 
                         if graph.GetN() > 1:
-				print graph.GetN()
-				f1= TF1("f1","pol1",200,600);
-				f2= TF1("f2","pol1",500,5000);
- 				if (i_range==0 and shuntMult==1):
- 					graph.Fit("f1","R") 
-				if (i_range==1 and shuntMult==1):
-					graph.Fit("f2","R") 
- 				else:
- 					graph.Fit("f1","0") 
-								
+				print "TOTAL:",graph.GetN()
+				#f1= TF1("f1","pol1",200,600);
+ 				#if (i_range==0 and shuntMult==1):
+ 				#	graph.Fit("f1","R") 
+ 				#else:
+ 				#	graph.Fit("pol1","0") 
+				graph.Fit("pol1","0")				
                                 linearizedGraphList.append(graph) 
-				if (i_range==1 and shuntMult==1):
-					fitLine = graph.GetFunction("f2")
-				else:                               
-                        	        fitLine = graph.GetFunction("f1")
-
+			#	if (i_range==0 and shuntMult==1):
+			#		fitLine = graph.GetFunction("f1")
+			#	else:                               
+                        	        #fitLine = graph.GetFunction("pol1")
+				fitLine =  graph.GetFunction("pol1")
                                 fitLine.SetNameTitle("fit_%s"%graph.GetName(),"fit_%s"%graph.GetName())
                                 fitLines[-1].append(fitLine)
                         else:
@@ -191,10 +184,6 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 graph.GetYaxis().SetTitle("Lin ADC")
                                 graph.GetYaxis().SetTitleOffset(1.2)
                                 graph.GetXaxis().SetTitle("Charge fC")
-				if i_range==0 and shuntMult==1:
-					graph.GetXaxis().SetRangeUser(200,600)
-				if i_range==1 and shuntMult==1:
-					graph.GetXaxis().SetRangeUser(500,5000)
                                 xVals = graph.GetX()
                                 exVals = graph.GetEX()
                                 yVals = graph.GetY()
@@ -210,15 +199,10 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 y = []
 
                                 for i in range(N):
-                                        #    if yVals[i] != 0:
                                         residuals.append((yVals[i]-fitLine.Eval(xVals[i]))/max(yVals[i],0.001))
-				#	residuals.append((yVals[p]-fitLine.Eval(xVals[p])))
                                         xLow = (xVals[i]-exVals[i])
                                         xHigh = (xVals[i]+exVals[i])
-                                        #eUp.append((yVals[i]-fitLine(xLow))/max(yVals[i],0.001))
-                                        #eDown.append((yVals[i]-fitLine(xLow))/max(yVals[i],0.001))
-                                        residualErrors.append(eyVals[i]/max(yVals[i],0.001))
-				#	residualErrors.append(eyVals[p])
+                                        residualErrors.append((eyVals[i]/max(yVals[i],0.001)))
                                         x.append(xVals[i])
 
 
@@ -228,15 +212,16 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 resErrDownArray = array('d',eDown)
                                 xArray = array('d',x)
                                 xErrorsArray = array('d',[0]*len(x))
-
-                                print  "the residuals are:",resArray
+				if i_range==1:
+                                	print  "the length of residuals are:",len(resArray)
+					print "the charge length :",len(x)
 
                                 residualGraphX = TGraphErrors(len(x),xArray,resArray, xErrorsArray, resErrArray)
 
                                 residualGraphX.SetTitle("")
                                 c1 = TCanvas()
                                 p1 = TPad("","",0,0.2,0.9,1)
-                                p2 = TPad("","",0,0,0.9,0.2)
+                                p2 = TPad("","",0.,0.,0.9,0.2)
                                 p1.Draw()
                                 p2.Draw()
                                 p1.SetFillColor(kWhite)
@@ -256,17 +241,12 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 xmax = graph.GetXaxis().GetXmax()
                                 ymin = graph.GetYaxis().GetXmin()
                                 ymax = graph.GetYaxis().GetXmax()
-				if (i_range==0 and shuntMult==1):
-					text = TPaveText(200 + (600-200)*.2, 200 - (200-50)*(.3),200 + (600-200)*.6,200-(200-50)*.1)
-				if  (i_range==1 and shuntMult==1):
-					text = TPaveText(500 + (5000-500)*.2, 1800 - (1800-50)*(.3),500 + (5000-500)*.6,1800-(1800-50)*.1)
-				else:
-                        	        text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
+                        	text = TPaveText(xmin + (xmax-xmin)*.2, ymax - (ymax-ymin)*(.3),xmin + (xmax-xmin)*.6,ymax-(ymax-ymin)*.1)
                                 text.SetFillColor(kWhite)
 				text.SetTextSize(0.75*text.GetTextSize())
                                 text.SetFillStyle(8000)
-                                text.AddText("Slope =  %.4f +- %.4f ADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))
-                                text.AddText("Offset =  %.2f +- %.2f ADC" % (fitLine.GetParameter(0), fitLine.GetParError(0)))
+                                text.AddText("Slope =  %.4f +- %.4f LinADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))
+                                text.AddText("Offset =  %.2f +- %.2f LinADC" % (fitLine.GetParameter(0), fitLine.GetParError(0)))
                                 text.Draw("same")
 
 
@@ -283,16 +263,9 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 # xmin = xmin-10
                                 # xmax = xmax+10
                                 if minCharge < 10: minCharge = -10
-                        # graph.GetXaxis().SetLimits(xmin-10,xmax+10)
-                                #graph.GetXaxis().SetLimits(minCharge*0.9, maxCharge*1.1)
 				graph.GetXaxis().SetLimits(xmin*0.9, xmax*1.1)
                                 graph.GetYaxis().SetLimits(ymin*.9,ymax*1.1)
-				if (i_range==0 and shuntMult==1):
-					 residualGraphX.GetXaxis().SetLimits(200, 600)
-				if (i_range==1 and shuntMult==1):
-					 residualGraphX.GetXaxis().SetLimits(500, 5000)
-				else:
-                                	 residualGraphX.GetXaxis().SetLimits(xmin*0.9, xmax*1.1)
+                                residualGraphX.GetXaxis().SetRangeUser(xmin*0.9, xmax*1.1)
                                 residualGraphX.GetYaxis().SetRangeUser(-0.1,0.1)
                                 residualGraphX.SetMarkerStyle(7)
                                 residualGraphX.GetYaxis().SetNdivisions(3,5,0)

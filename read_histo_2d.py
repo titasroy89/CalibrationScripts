@@ -4,6 +4,7 @@ gROOT.SetBatch()
 import sqlite3 as lite
 from array import array
 from linearADC import *
+import math
 # from ROOT import *
 # gROOT.SetBatch()
 # c1 = TCanvas('c1', 'Plots', 1000, 500)
@@ -136,9 +137,6 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 				#adcDist[i_qieRange][histNum]={}
 				for i_capID in range(4):
 					
-	
-					histo_[i_qieRange][histNum][i_capID] = TH2F("histo_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),"histo_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),len(DACBins)-1,DACBins, len(linADCBins)-1, linADCBins)
-
 					histo_charge[i_qieRange][histNum][i_capID]=TH2F("histocharge_fC_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),"histocharge_fC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),len(chargeBins[i_qieRange][histNum])-1,chargeBins[i_qieRange][histNum], len(linADCBins)-1, linADCBins)
 					for ix in range(1,hist.GetNbinsX()+1):
 						for iy in range(1,64):
@@ -151,7 +149,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 						adcDist = histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)
 						mean[i_qieRange][histNum][i_capID].append(adcDist.GetMean())
 
-						rms[i_qieRange][histNum][i_capID].append( adcDist.GetRMS())
+						rms[i_qieRange][histNum][i_capID].append( adcDist.GetRMS()/math.sqrt(12))
 						
 					
 		
@@ -159,5 +157,5 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
                        		if not goodLink: continue
                                         
         tf.Close()
-        print mean[0][120][0]                        
+        #print mean[0][120][0]                        
         return results, mean, rms, charge

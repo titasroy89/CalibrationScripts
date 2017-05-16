@@ -10,31 +10,6 @@ def CleanGraph(graph, i_range):
     vOffset = i_range*64
     points = range(graph.GetN())
      
-    points.reverse()
-#    print points
-   # removeRest = False
-
-   # for p in points:
-#	if i_range==0:
-#		 if graph.GetY()[p] < 1 or graph.GetY()[p] >linADC(60)[0]:
-#			graph.RemovePoint(p)
-#	if i_range==1:
- #                if graph.GetY()[p] < linADC(65)[0] or graph.GetY()[p] >linADC(120)[0]:
-  #                      graph.RemovePoint(p)
-                        #nominalgraph.RemovePoint(p)
-   #     if i_range==2:
-    #             if graph.GetY()[p] < linADC(128)[0] or graph.GetY()[p] >linADC(182)[0]:
-     #                   graph.RemovePoint(p)
-     #   if i_range==3:
-      #           if graph.GetY()[p] < linADC(192)[0] or graph.GetY()[p] >linADC(250)[0]:
-       #                 graph.RemovePoint(p)
-       # if graph.GetX()[p] < 0:
-        #         graph.RemovePoint(p)
-	
-
-
-#    if i_range==0:
- #       graph.RemovePoint(0)
     return graph
 
 
@@ -63,10 +38,10 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
             print graph.GetName()
 	    f1= TF1("f1","pol1",200,600);
-            graph.Fit("f1","R")
-	    
-            line = graph.GetFunction("f1")
-	    graph.GetXaxis().SetRange(200,600)
+            #graph.Fit("f1","R")
+	    graph.Fit("pol1","0")
+            line = graph.GetFunction("pol1")
+	   # graph.GetXaxis().SetRangeUser(200,600)
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
             lowCurrentPeds.append(-1*(line.GetParameter(0)-bin0startLevel)/line.GetParameter(1))
