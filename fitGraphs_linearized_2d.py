@@ -128,19 +128,19 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
 
                         if graph.GetN() > 1:
 				print "TOTAL:",graph.GetN()
-			#	f1= TF1("f1","pol1",200,600);
-			#	f1.FixParameter(0,-0.5)
- 			#	if (i_range==0 and shuntMult==1):
- 			#		graph.Fit("f1","R0") 
- 			#	else:
- 			#		graph.Fit("pol1","0") 
-				graph.Fit("pol1","0")				
+				f1= TF1("f1","pol1",200,600);
+#				f1.FixParameter(0,-0.5)
+ 				if (i_range==0 and shuntMult==1):
+ 					graph.Fit("f1","R0") 
+ 				else:
+ 					graph.Fit("pol1","0") 
+			#	graph.Fit("pol1","0")				
                                 linearizedGraphList.append(graph) 
-			#	if (i_range==0 and shuntMult==1):
-			#		fitLine = graph.GetFunction("f1")
-			#	else:                               
-                        #	        fitLine = graph.GetFunction("pol1")
-				fitLine =  graph.GetFunction("pol1")
+				if (i_range==0 and shuntMult==1):
+					fitLine = graph.GetFunction("f1")
+				else:                               
+                        	        fitLine = graph.GetFunction("pol1")
+			#	fitLine =  graph.GetFunction("pol1")
                                 fitLine.SetNameTitle("fit_%s"%graph.GetName(),"fit_%s"%graph.GetName())
                                 fitLines[-1].append(fitLine)
                         else:
@@ -248,6 +248,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 text.SetFillStyle(8000)
                                 text.AddText("Slope =  %.4f +- %.4f LinADC/fC" % (fitLine.GetParameter(1), fitLine.GetParError(1)))
                                 text.AddText("Offset =  %.2f +- %.2f LinADC" % (fitLine.GetParameter(0), fitLine.GetParError(0)))
+				text.AddText("Chisquare = %e " % (fitLine.GetChisquare()))
                                 text.Draw("same")
 
 
@@ -286,12 +287,15 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 c1.SaveAs(saveName)
 
         if shuntMult == 1:
-                ranges = range(4)
-                
-                params = [[],[],[],[]]
+	        ranges = range(4)
         else:
-                ranges = range(2)
-                params = [[],[],[]]
+		ranges = range(2)        
+        params = [[],[],[],[]]
+	
+	high_range=[ ]
+        #else:
+         #       ranges = range(2)
+          #      params = [[],[],[]]
 
         for irange in ranges:
                 if fitLines[irange]==None:
@@ -299,13 +303,21 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 params[irange].append([-1,-1])
                         continue
                 for icapID in range(4):
-                        offset = fitLines[irange][icapID].GetParameter(0)
+			if shuntMult==1:
+                                high_range.append([fitLines[0][icapID].GetParameter(1),fitLines[0][icapID].GetParameter(0),fitLines[0][icapID].GetParError(1)])
+                              #  high_range.append([fitLines[0][icapID].GetParameter(1),fitLines[0][icapID].GetParError(1),fitLines[0][icapID].GetParError(1)])
+
+			if irange==0 and shuntMult==1:
+				offset = -0.5
+			else:
+                        	offset = fitLines[irange][icapID].GetParameter(0)
                         slope = fitLines[irange][icapID].GetParameter(1)
                         uncertainty = fitLines[irange][icapID].GetParError(1)
                         params[irange].append([slope,offset,uncertainty])
-
-
-
+       
+		
+       # print  high_range
+	#sys.exit()
         # outputTGraphs.cd("LinadcVsCharge")
         # for graph in linearizedGraphList:
         #       graph.Write()
@@ -378,7 +390,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 
                         c1.SaveAs(saveName)
 
-        return params
+        return params, high_range
 
 
 

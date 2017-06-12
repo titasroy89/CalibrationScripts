@@ -6,7 +6,8 @@ import subprocess
 import sys
 from numpy import std
 from ROOT import *
-
+import re
+from array import array
 from getPedestals import *
 
 #script to control DAC
@@ -40,26 +41,32 @@ shunt_Val ={1:0,
             11.5:31}        
 shuntMultList = shunt_Val.keys()
 shuntMultList.sort()
+Barcode_UID ={hex(0xead4b070):600028,
+	      hex(0xeabb9870):600549,
+	      hex(0xeab47170):600639,
+	      hex(0xead65570):600709,
+	      hex(0xeacc8d70):600458,
+	      hex(0xea93f270):600425,
+	      hex(0xeacd8870):600426,
+	      hex(0xea9db770):600429,
+	      hex(0xeabb1f70):600489,
+	      hex(0xeaaeaa70):600033,
+	      hex(0xeabfc070):600078,
+	      hex(0xeaa7ef70):600095,
+	      hex(0xeabcff70):600106,
+	      hex(0xead3d470):600463,
+	      hex(0xea9e6d70):600501,
+	      hex(0xeaa72770):600670}
+	     # hex(0xead5c870):600064,
+	     # hex(0xead60170):600658}  
+BarcodeList = Barcode_UID.keys()
+BarcodeList.sort()
 
-# sys.path.insert(0, '/home/hep/ChargeInjector/hcal_teststand_scripts_HE')
-
-# from hcal_teststand.uhtr import *
-# #from hcal_teststand import *
-# from hcal_teststand.hcal_teststand import *
-# #from hcal_teststand.qie import *
-
-# from ngccmEmulatorCommands import *
-# from simpleLinkMap import getSimpleLinkMap
 
 import sqlite3 as lite
-
-#from TDC_scan import *
+mg = TMultiGraph()
 
 from read_histo_2d import read_histo_2d
-print '1'
-#from checkLinks_Old import *
-#from checkLinks import *
-#from SerialNumberMap import *
 
 gROOT.SetBatch(kTRUE)
 
@@ -84,8 +91,6 @@ fakesimpleCardMap = {1  : 1 , 2  : 2 , 3  : 3 , 4  : 4 , 5  : 5 , 6  : 6 , 7  : 
                              }
 
 
-#outputDir = 'Data_CalibrationScans/2016-07-14/Run_01'
-#outputDirectory= 'Data_CalibrationScans/2016-07-14/Run_01'
 def getValuesFromFile(outputDir):
         """
         Gets data from the cardData text file from the previous run
@@ -137,10 +142,6 @@ def QIECalibrationScan(options):
         print "Reading from directory %s"%outputDirectory
         print "final file is %s"%final_file
 
-        # print '-'*30
-        # print 'Start Mapping'
-        # print '-'*30
-        ## run mapping of injection cards to qie cards
 
 
         linkMap, injectionCardMap = getValuesFromFile(outputDirectory)
@@ -151,8 +152,6 @@ def QIECalibrationScan(options):
         histoList = []
         for link in linkMap:
 		histoList += [link*6,link*6+1,link*6+2,link*6+3,link*6+4,link*6+5]
-#        histoList=[ i for i in range(15*6+6)]
-
         print '-'*30
         print 'Histograms List'
         print '-'*30
@@ -164,15 +163,18 @@ def QIECalibrationScan(options):
 
 
         outputParamFile = open(outputDirectory+"calibrationParams.txt",'w')
-        outputParamFile.write('(qieID, serialNum, qieNum, capID, qieRange,shuntMult, outputDirectory, timeStamp, slope, offset,uncertainty)\n')
+        outputParamFile.write('(qieID, barcode, qieNum, capID, qieRange,shuntMult,Gsel,slope,offset,uncertainty)\n')
 
         uID_list = []
         for link in linkMap:
                 uID = linkMap[link]['unique_ID'].replace(' ','_')
+				
+		#print linkMap[link]['unique_ID'].split()[1]
                 if not uID in uID_list:
                         uID_list.append(uID)
+		
 
-
+        #sys.exit()
 
 
         qieParams={}
@@ -190,20 +192,16 @@ def QIECalibrationScan(options):
  
                  qieParams[uID] = lite.connect(outputDirectory+"qieCalibrationParameters_%s.db"%(uID))
                  cursor[uID] = qieParams[uID].cursor()
-                 cursor[uID].execute("drop table if exists qieparams")
                  cursor[uID].execute("drop table if exists qieshuntparams")
-                 cursor[uID].execute("drop table if exists qietdcparams")
-                 cursor[uID].execute("create table if not exists qieparams(id STRING, serial INT, qie INT, capID INT, range INT, directoryname STRING, date STRING, slope REAL, offset REAL, uncertainty REAL)")
  
-                 cursor[uID].execute("create table if not exists qieshuntparams(id STRING, serial INT, qie INT, capID INT, range INT, shunt INT, directoryname STRING, date STRING    , slope REAL, offset REAL, uncertainty REAL)")
+                 cursor[uID].execute("create table if not exists qieshuntparams(id STRING, barcode STRING, qie INT, capID INT, range INT, shunt INT, Gsel INT, slope REAL, offset REAL, uncertainty REAL)")
 
-                 cursor[uID].execute("create table if not exists qietdcparams(id STRING, qie INT, tdcstart REAL)")
 
 
 
         ### Graph parameters
         outputParamFile_shunt = open(outputDirectory+"calibrationParams_shunt.txt",'w')
-        outputParamFile_shunt.write('(qieID, serialNum, qieNum, capID, qieRange, shuntMult,outputDirectory, timeStamp, slope, offset, uncertainty)\n') 
+        outputParamFile_shunt.write('(qieID, barcode,qieNum, capID, qieRange, shuntMult, Gsel,slope, offset, uncertainty)\n') 
         
         if options.RunShunt:
                 print " Shunt Scans begin"
@@ -219,7 +217,6 @@ def QIECalibrationScan(options):
 
 	pedestalVals = {}
 
-	print "Get Pedestals"
 
 	pedestal_graphs_shunt ={}
         for shuntMult in shuntMult_list:
@@ -237,17 +234,17 @@ def QIECalibrationScan(options):
 			run = value
 	_filePeds = TFile("%s/PedestalPlots/pedestalMeasurement_%s_%s.root"%(outputDirectory,date, run),"recreate")
 	_filePeds.Close()
+	print "Now Get Pedestals"
 
 	pedestalVals = getPedestals(pedestal_graphs_shunt,shuntMult_list,histoList,outputDirectory, date, run)
 
-	for ih in histoList:
-		#get low current pedestal
-		print pedestal_graphs_shunt[1.0][ih]
-		print pedestalVals[ih]
-
-#	sys.exit()
-
+#	for ih in histoList:
+		#print pedestal_graphs_shunt[1.0][ih]
+		#print pedestalVals[ih]
+	high_slope=[]
+	shuntFactors={}
         for shuntMult in shuntMult_list:
+		shuntFactors[shuntMult]={}
                 graphs_shunt ={}
                 output={}
                 print "Now on shuntMult %.1f"%shuntMult
@@ -262,21 +259,37 @@ def QIECalibrationScan(options):
                 for i_range in qieRange:
 			histoList =  vals[i_range].keys()
 			histoList.sort()
-            #print "now",histoList
 			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],mean, rms, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
-                   #    print "Now printing out put from adcTofC"            
-                        #print graphs_shunt
-
+		shunts_method1 = [array('d') for i in range(12)]
                 for ih in histoList:
-
+			
 			linkNum = int(ih/6)
 			qieID = linkMap[linkNum]['unique_ID']
-                    #injectionMapping[simpleCardMap[int(ih/12)]]['id']
-			serial = 699999
+			
+			#print qieID
+			uID_barcode = linkMap[linkNum]['unique_ID'].split()[1]
+			#print uID_barcode
+			shuntFactors[shuntMult]
+			if uID_barcode not in BarcodeList:
+				barcode = 600000
+				for i in range(12):
+					for r in range(12):
+						shunts_method1[i].append(float(shuntMult))
+			else:
+				barcode = Barcode_UID[uID_barcode] 
+				
+				f1 = open("/Users/titasroy/cmshcal11_github/Method1_shuntfactors_%s.txt"%(uID_barcode)).readlines()
+                                for line in f1:
+                                        for i in range(12):
+                                		shunts_method1[i].append(float(line.split()[i]))
+			
+				print len(shunts_method1)
+				print len(shunts_method1[0])
+			#sys.exit()
 
+			#print "Barcode is:",barcode
 			qieNum =ih%12 + 1
 			graphList_shunt=[]
-                    #if 1 in graphs_shunt:
 
 			if 0 in graphs_shunt:
 				graphList_shunt.append(graphs_shunt[0][ih])
@@ -294,20 +307,30 @@ def QIECalibrationScan(options):
 				graphList_shunt.append(graphs_shunt[3][ih])
 			else:
 				graphList_shunt.append(None)
-
-			params_shunt =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestalVals = pedestalVals[ih])
-# 			params_shunt, pedestalVals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestal = pedestalVals)
-			print params_shunt
+			if shuntMult ==1 :
+				params_shunt, high_ranges =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestalVals = pedestalVals[ih])
+			else:
+				params_shunt, high_vals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestalVals = pedestalVals[ih])
+			high_slopes=high_ranges
 			uID = qieID.replace(' ', '_')
-
-			for i_range in graphs_shunt:
+				
+			#for i_range in graphs_shunt:
+			for i_range in range(4):
 				for i_capID in range(4):
-					print shuntMult, i_range, i_capID
-					values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], params_shunt[i_range][i_capID][1],params_shunt[i_range][i_capID][2])
-					#if i_range == 0:
-					#	values_shunt = (qieID, serial, qieNum, i_capID, i_range, shuntMult, outputDirectory, str(datetime.now()), params_shunt[i_range][i_capID][0], 0,params_shunt[i_range][i_capID][2])
-					print values_shunt
-					cursor[uID].execute("insert into qieshuntparams values (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)",values_shunt)
+					if (shuntMult==1 and( i_range==0 or i_range==1 or i_range==2 or i_range==3)) or i_range==0 or i_range==1:
+						print shuntMult, i_range
+						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_Val[shuntMult], (params_shunt[i_range][i_capID][0]),(params_shunt[i_range][i_capID][1]),(params_shunt[i_range][i_capID][2]))
+						cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?, ?)",values_shunt)
+					elif (shuntMult ==1.5 or shuntMult==2 or shuntMult==3 or shuntMult==4 or shuntMult==5 or shuntMult==6 or shuntMult==7 or shuntMult==8 or shuntMult==9 or shuntMult==10 or shuntMult==11) and (i_range==2 or i_range==3):
+						print shuntMult, i_range, qieNum, int(shuntMult)-1
+						print shunts_method1[int(shuntMult)-1][int(qieNum-1)]
+						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_Val[shuntMult], (high_slopes[i_capID][0])/shunts_method1[int(shuntMult)-1][qieNum-1],(high_slopes[i_capID][1])/shunts_method1[int(shuntMult)-1][qieNum-1],(high_slopes[i_capID][2])/shunts_method1[int(shuntMult)-1][qieNum-1])
+						cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?,?)",values_shunt)
+					if shuntMult==11.5 and (i_range==2 or i_range==3):
+						print shuntMult, i_range
+						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_Val[shuntMult], (high_slopes[i_capID][0])/shunts_method1[11][qieNum-1],(high_slopes[i_capID][1])/shunts_method1[11][qieNum-1],(high_slopes[i_capID][2])/shunts_method1[11][qieNum-1])
+                                                cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?,?)",values_shunt)
+
 					# print values_shunt
 					outputParamFile_shunt.write(str(values_shunt)+'\n')
          
@@ -321,8 +344,7 @@ def QIECalibrationScan(options):
         for uID in uID_list:
                 graphParamDist(outputDirectory+"qieCalibrationParameters_%s.db"%uID)
 
-        problemCards = []
-        for uID in uID_list:
+		problemCards = []
                 outputFileName = "%s/fitResults_%s.root"%(outputDirectory, uID)
                 badChannels = fillFitUncertaintyHists(outputFileName)
                 if len(badChannels) > 0:
@@ -331,7 +353,6 @@ def QIECalibrationScan(options):
                                 if linkMap[i_link]['unique_ID']==uID.replace('_',' '):
                                         slot = linkMap[i_link]['slot']
                         problemCards.append([slot,uID.replace('_',' ')])
-
         for card in problemCards:
                 print '*'*40
                 print 'PROBLEM WITH FIT IN QIE CARD'

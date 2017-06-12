@@ -21,7 +21,7 @@ shuntMultList.sort()
 def graphParamDist(paramFileName):
 
     outputDirectory = paramFileName.split('qieCalibrationParam')[0]
-
+    #outputDirectory = '/Users/titasroy/cmshcal11_github/Data/database_05_22/'
     paramDB = sqlite3.connect(paramFileName)
     cursor = paramDB.cursor()
     qieCards = [x[0] for x in list(set(cursor.execute("select id from qieshuntparams").fetchall()))]
@@ -59,20 +59,20 @@ def graphParamDist(paramFileName):
             range2MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),2,shuntMult]).fetchone()
             range3MinMax = cursor.execute("select min(slope), max(slope), min(offset), max(offset), min(uncertainty), max(uncertainty) from qieshuntparams where id = ? and range=? and shunt=?", [str(uniqueID),3,shuntMult]).fetchone()
 
-            if shuntMult>1: 
-                range3MinMax= [1,1,1,1] 
-                range2MinMax= [1,1,1,1] 
+           # if shuntMult>1: 
+            #    range3MinMax= [1,1,1,1] 
+             #   range2MinMax= [1,1,1,1] 
                 #range1MinMax= [1,1,1,1]
             
 
-            hists[shuntMult] = {0:[TH1F("Range0Slopes_shunt%.1f"%shuntMult,"Range0Slopes_shunt%.1f"%shuntMult,50,range0MinMax[0]*0.8,range0MinMax[1]*1.2), TH1F("Range0Offsets_shunt%.1f"%shuntMult,"Range0Offsets_shunt%.1f"%shuntMult,50,range0MinMax[2]*1.2, range0MinMax[3]*1.2), TH1F("Range0Uncertainties_shunt%.1f"%shuntMult,"Range0Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
-                                1:[TH1F("Range1Slopes_shunt%.1f"%shuntMult,"Range1Slopes_shunt%.1f"%shuntMult,50,range1MinMax[0]*0.8,range1MinMax[1]*1.2), TH1F("Range1Offsets_shunt%.1f"%shuntMult,"Range1Offsets_shunt%.1f"%shuntMult,50,range1MinMax[2]*1.2, range1MinMax[3]*1.2),TH1F("Range1Uncertainties_shunt%.1f"%shuntMult,"Range1Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
-                                2:[TH1F("Range2Slopes_shunt%.1f"%shuntMult,"Range2Slopes_shunt%.1f"%shuntMult,50,range2MinMax[0]*0.8,range2MinMax[1]*1.2), TH1F("Range2Offsets_shunt%.1f"%shuntMult,"Range2Offsets_shunt%.1f"%shuntMult,50,range2MinMax[2]*1.2, range2MinMax[3]*1.2), TH1F("Range2Uncertainties_shunt%.1f"%shuntMult,"Range2Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
-                                3:[TH1F("Range3Slopes_shunt%.1f"%shuntMult,"Range3Slopes_shunt%.1f"%shuntMult,50,range3MinMax[0]*0.8,range3MinMax[1]*1.2), TH1F("Range3Offsets_shunt%.1f"%shuntMult,"Range3Offsets_shunt%.1f"%shuntMult,50,range3MinMax[2]*1.2, range3MinMax[3]*1.2), TH1F("Range3Uncertainties_shunt%.1f"%shuntMult,"Range3Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+            hists[shuntMult] = {0:[TH1F("Range0Slopes_shunt%.1f"%shuntMult,"Range0Slopes_shunt%.1f"%shuntMult,100,.94*.3/shuntMult,1.1*.3/shuntMult), TH1F("Range0Offsets_shunt%.1f"%shuntMult,"Range0Offsets_shunt%.1f"%shuntMult,100,-1., 0.), TH1F("Range0Uncertainties_shunt%.1f"%shuntMult,"Range0Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+                                1:[TH1F("Range1Slopes_shunt%.1f"%shuntMult,"Range1Slopes_shunt%.1f"%shuntMult,100,.94*.3/shuntMult,1.1*.3/shuntMult), TH1F("Range1Offsets_shunt%.1f"%shuntMult,"Range1Offsets_shunt%.1f"%shuntMult,100,-20,150),TH1F("Range1Uncertainties_shunt%.1f"%shuntMult,"Range1Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+                                2:[TH1F("Range2Slopes_shunt%.1f"%shuntMult,"Range2Slopes_shunt%.1f"%shuntMult,100,.94*.3/shuntMult,1.1*.3/shuntMult), TH1F("Range2Offsets_shunt%.1f"%shuntMult,"Range2Offsets_shunt%.1f"%shuntMult,100,-20,150), TH1F("Range2Uncertainties_shunt%.1f"%shuntMult,"Range2Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
+                                3:[TH1F("Range3Slopes_shunt%.1f"%shuntMult,"Range3Slopes_shunt%.1f"%shuntMult,100,.94*.3/shuntMult,1.1*.3/shuntMult), TH1F("Range3Offsets_shunt%.1f"%shuntMult,"Range3Offsets_shunt%.1f"%shuntMult,100,-20,150), TH1F("Range3Uncertainties_shunt%.1f"%shuntMult,"Range3Uncertainties_shunt%.1f"%shuntMult, 50,1.*10**-8,10.*10**-6)],
                      }
 
         for entry in parameterValues:
-            qieID, serial, qieNum, i_capID, qieRange,shuntMult, directory, timestamp, slope, offset, uncertainty = entry
+            qieID, barcode, qieNum, i_capID, qieRange,shuntMult, Gsel, slope, offset, uncertainty= entry
             slopes_[shuntMult][i_capID][qieRange].append(float(slope))         
             hists[shuntMult][qieRange][0].Fill(slope)
             hists[shuntMult][qieRange][1].Fill(offset)
@@ -131,6 +131,13 @@ if __name__=="__main__":
     if len(sys.argv)==2:
         outFile = sys.argv[1]
 
-        graphParamDist(outFile)
+#        graphParamDist(outFile)
 
-#	graphParamDist("/Users/titasroy/cmshcal11_github/Data/2016-08-04/Run_05/qieCalibrationParameters_0x86000000_0xead65570.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0x83000000_0xeaaeaa70.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0xd0000000_0xeaa72770.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0x3e000000_0xeabfc070.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0xb9000000_0xeabcff70.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0xee000000_0xeaa7ef70.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0x1d000000_0xea9e6d70.db")
+#graphParamDist("/Users/titasroy/cmshcal11_github/sqlite_05_22/qieCalibrationParameters_0x89000000_0xead3d470.db")
+

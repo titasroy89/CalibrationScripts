@@ -52,10 +52,10 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
         	else:
                 	highCurrent = True
        		print "Now on shunt %.1f and range %i"%(shuntMult,i_qieRange)
-        	if highCurrent:
-                	print "Using high-current mode"
-        	else:
-                	print "Using low-current mode"
+        #	if highCurrent:
+         #       	print "Using high-current mode"
+        #	else:
+         #       	print "Using low-current mode"
 		rms[i_qieRange]={}
 		mean[i_qieRange]={}
                 chargeBins[i_qieRange]={}
@@ -131,10 +131,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 					chargeBins[i_qieRange][histNum].append(-1.*chargeq)
 
 				
-				
-				#histo_[i_qieRange][histNum]={}
 				histo_charge[i_qieRange][histNum]={}
-				#adcDist[i_qieRange][histNum]={}
 				for i_capID in range(4):
 					
 					histo_charge[i_qieRange][histNum][i_capID]=TH2F("histocharge_fC_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),"histocharge_fC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),len(chargeBins[i_qieRange][histNum])-1,chargeBins[i_qieRange][histNum], len(linADCBins)-1, linADCBins)
@@ -147,23 +144,23 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 						charge[i_qieRange][histNum].append(float(chargeBins[i_qieRange][histNum][ix-1]))
 				
 						adcDist = histo_charge[i_qieRange][histNum][i_capID].ProjectionY("adc_%i_%i_qieRange_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_qieRange,int(shuntMult),int(shuntMult%1*10),i_capID),ix,ix)
-						mean[i_qieRange][histNum][i_capID].append(adcDist.GetMean())
+						#mean[i_qieRange][histNum][i_capID].append(adcDist.GetMean())
 						N = adcDist.Integral()
 						if N==0:continue
-					#	print adcDist.Integral()
-					#	if adcDist.GetRMS()==0:
-					#		 rms[i_qieRange][histNum][i_capID].append(1/math.sqrt(12*N))
-			
-					#	rms[i_qieRange][histNum][i_capID].append(adcDist.GetRMS()/math.sqrt(N))
-						rms[i_qieRange][histNum][i_capID].append(max(adcDist.GetRMS(),1/math.sqrt(12))/math.sqrt(N))
+						mean[i_qieRange][histNum][i_capID].append(adcDist.GetMean())
+						
+				#		if adcDist.GetRMS()==0:
+				#			 rms[i_qieRange][histNum][i_capID].append(1/math.sqrt(12*N))
+				#		else:
+				#			 rms[i_qieRange][histNum][i_capID].append(adcDist.GetRMS()/math.sqrt(N))
+					       	rms[i_qieRange][histNum][i_capID].append(max(adcDist.GetRMS(),1/math.sqrt(12))/math.sqrt(N))
 					
 							
-					#print "Intgeral is :", adcDist.Integral()	
 					
 		
 
                        		if not goodLink: continue
                                         
         tf.Close()
-        #print mean[0][120][0]                        
+                               
         return results, mean, rms, charge

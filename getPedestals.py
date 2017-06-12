@@ -24,7 +24,10 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
 
     c1 = TCanvas()
     c1.Divide(2,2)
-
+    c2 = TCanvas('c2', 'Plots', 1000, 500)
+    c2.SetFillColor(0)
+    c2.SetGrid()
+   
     shuntPeds = {}
     
     for ih in histoList:
@@ -36,12 +39,9 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
         for i_capID in range(4):
             #remove lower and upper ends of ADC to make it clean
             graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
-            print graph.GetName()
 	    f1= TF1("f1","pol1",200,600);
-            #graph.Fit("f1","0")
-	    graph.Fit("f1","0")
+            graph.Fit("f1","R0")
             line = graph.GetFunction("f1")
-	   # graph.GetXaxis().SetRangeUser(200,600)
             graph.Write()
             #pedestal is the x-intercept of the graph (-offset/slope)
             lowCurrentPeds.append(-1*(line.GetParameter(0)-bin0startLevel)/line.GetParameter(1))
@@ -55,11 +55,14 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
                 continue
             highCurrentShuntPeds[i_shunt]=[]
             for i_capID in range(4):
+		#print ih, i_shunt, i_capID
                 graph = CleanGraph(graphs_shunt[i_shunt][ih][i_capID],0)
-		#f1= TF1("f1","pol1",200,600);
+	#	if i_shunt==1.5 and ih==14 and i_capID==1:
+	#		graph.Draw("ap")
+	#		c2.SaveAs("trial_2.pdf")		
                 graph.Fit("pol1","0")
-                graph.Write()
                 line = graph.GetFunction("pol1")
+		graph.Write()
                 highCurrentShuntPeds[i_shunt].append(-1*(line.GetParameter(0)-bin0startLevel)/line.GetParameter(1))
 
 
@@ -78,7 +81,7 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             graphs.append(TGraph(len(x),_x,_y))
             graphs[-1].SetNameTitle(graphs_shunt[1.0][ih][i_capID].GetTitle().replace("_shunt_1_0_","_"),graphs_shunt[1.0][ih][i_capID].GetTitle().replace("_shunt_1_0_","_"))
 	    graphs[-1].GetYaxis().SetRangeUser(-500,150)
-            graphs[-1].Fit("pol1")
+            graphs[-1].Fit("pol1","0")
             line = graphs[-1].GetFunction("pol1")
             c1.cd(i_capID+1)
             graphs[-1].SetMarkerStyle(7)

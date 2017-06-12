@@ -85,7 +85,7 @@ struct GlobalChi2 {
 
 void makeFits() {
 
-  TFile* _file = TFile::Open("/Users/titasroy/cmshcal11_github/Data/2016-08-04/Run_05/fitResults_0x86000000_0xead65570.root","READ");
+  TFile* _file = TFile::Open("/Users/titasroy/cmshcal11_github/Data/database_05_22/fitResults_0x86000000_0xead65570.root","READ");
   char filename[100];
   char filename1[100];
   char filename2[100];
@@ -102,26 +102,27 @@ void makeFits() {
   char filename13[100];
   char filename14[100];
   char filename15[100];
-
+  std::cout <<"here"<<std::endl;
   std::vector<float> shunt_factor;
-  for( int i= 120; i < 121; i++ ) {
+  for( int i= 120; i < 132; i++ ) {
   int j= i-119;
-  sprintf(filename,"LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_1_0_capID_0_linearized",i,j);
-  sprintf(filename1,"LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_1_0_capID_1_linearized",i,j);
-  sprintf(filename2,"LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_1_0_capID_2_linearized",i,j);
-  sprintf(filename3,"LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_1_0_capID_3_linearized",i,j);
-  sprintf(filename4,"LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_1_0_capID_0_linearized",i,j);
-  sprintf(filename5,"LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_1_0_capID_1_linearized",i,j);
-  sprintf(filename6,"LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_1_0_capID_2_linearized",i,j);
-  sprintf(filename7,"LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_1_0_capID_3_linearized",i,j);
-  sprintf(filename8,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_6_0_capID_0_linearized",i,j);
-  sprintf(filename9,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_6_0_capID_1_linearized",i,j);
-  sprintf(filename10,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_6_0_capID_2_linearized",i,j);
-  sprintf(filename11,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_0_shunt_6_0_capID_3_linearized",i,j);
-  sprintf(filename12,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_6_0_capID_0_linearized",i,j);
-  sprintf(filename13,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_6_0_capID_1_linearized",i,j);
-  sprintf(filename14,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_6_0_capID_2_linearized",i,j);
-  sprintf(filename15,"Shunted_LinadcVsCharge/ADCvsfC_%d_%d_range_1_shunt_6_0_capID_3_linearized",i,j);
+  sprintf(filename,"LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_1.0_capID_0_linearized",i,j);
+  sprintf(filename1,"LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_1.0_capID_1_linearized",i,j);
+  sprintf(filename2,"LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_1.0_capID_2_linearized",i,j);
+  sprintf(filename3,"LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_1.0_capID_3_linearized",i,j);
+  sprintf(filename4,"LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_1.0_capID_0_linearized",i,j);
+  sprintf(filename5,"LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_1.0_capID_1_linearized",i,j);
+  sprintf(filename6,"LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_1.0_capID_2_linearized",i,j);
+  sprintf(filename7,"LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_1.0_capID_3_linearized",i,j);
+  sprintf(filename8,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_3.0_capID_0_linearized",i,j);
+  sprintf(filename9,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_3.0_capID_1_linearized",i,j);
+  sprintf(filename10,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_3.0_capID_2_linearized",i,j);
+  sprintf(filename11,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_0_shunt_3.0_capID_3_linearized",i,j);
+  sprintf(filename12,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_3.0_capID_0_linearized",i,j);
+  sprintf(filename13,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_3.0_capID_1_linearized",i,j);
+  sprintf(filename14,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_3.0_capID_2_linearized",i,j);
+  sprintf(filename15,"Shunted_LinadcVsCharge/LinADCvsfC_%d_%d_range_1_shunt_3.0_capID_3_linearized",i,j);
+  std::cout<<filename<<std::endl;
   TGraphErrors *g1 = (TGraphErrors*)_file->Get(filename);
   TGraphErrors * g2 = (TGraphErrors*) _file->Get(filename1);
   TGraphErrors * g3 = (TGraphErrors*) _file->Get(filename2);
@@ -139,8 +140,8 @@ void makeFits() {
   TGraphErrors * g6shunt =(TGraphErrors*)  _file->Get(filename13);
   TGraphErrors * g7shunt =(TGraphErrors*)  _file->Get(filename14);
   TGraphErrors * g8shunt =(TGraphErrors*)  _file->Get(filename15);
-
-  std::cout << "before linear fit" << std::endl;
+  
+  //std::cout << "before linear fit" << std::endl;
   TF1 *pol1 = new TF1("pol1","pol1",200,600);
   g1->Fit("pol1","R");
   g2->Fit("pol1","R");
@@ -150,7 +151,7 @@ void makeFits() {
   g6->Fit("pol1","0");
   g7->Fit("pol1","0");
   g8->Fit("pol1","0");
-  std::cout << "before get parameters" << std::endl;
+  //std::cout << "before get parameters" << std::endl;
   double offset1 = g1->GetFunction("pol1")->GetParameter(0);
   double offset2 = g2->GetFunction("pol1")->GetParameter(0);
   double offset3 = g3->GetFunction("pol1")->GetParameter(0);
@@ -167,7 +168,7 @@ void makeFits() {
   double slope6 = g6->GetFunction("pol1")->GetParameter(1);
   double slope7 = g7->GetFunction("pol1")->GetParameter(1);
   double slope8 = g8->GetFunction("pol1")->GetParameter(1);
-  std::cout << offset1 << std::endl;
+//  std::cout << offset1 << std::endl;
   // Define functions with slopes/offsets hardcoded in for testing purposes
 //   TF1 * f1 = new TF1("fit1","[0]*(7.58965106426878929e-03+3.06953080266622103e-01*x)",0,100);
 //   TF1 * f2 = new TF1("fit2","[0]*(9.82985765887945534e-04+3.06370846586603629e-01*x)",0,100);
@@ -241,7 +242,7 @@ void makeFits() {
   ROOT::Fit::Fitter fitter;
 
   const int Npar = 17;
-  double par0[Npar] = { 6, 
+  double par0[Npar] = { 3, 
 			offset1, slope1,
 			offset2, slope2,
 			offset3, slope3,
@@ -277,7 +278,7 @@ void makeFits() {
   fitter.Config().SetMinimizer("Minuit2","Migrad");
   fitter.FitFCN(17,globalChi2,0,data1.Size()+data2.Size()+data3.Size()+data4.Size()+data5.Size()+data6.Size()+data7.Size()+data8.Size(),true);
   ROOT::Fit::FitResult result = fitter.Result();
- // result.Print(std::cout);
+  result.Print(std::cout);
   //std::cout<<"Only thing that matters"<<result.Parameter(0)<<std::endl;
   shunt_factor.push_back(1/(result.Parameter(0)));
   TCanvas * c1 = new TCanvas("Simfit","Simultaneous fit of 8 graphs",700,700);
@@ -341,7 +342,7 @@ void makeFits() {
   g8shunt->Draw("alp");
 
 
-  c1->SaveAs("qie1_0x86000000_0xead65570_method2.pdf");
+  //c1->SaveAs("qie1_0x86000000_0xead65570_method2.pdf");
 
 }
 for (int i = 0; i < shunt_factor.size(); i++) {
