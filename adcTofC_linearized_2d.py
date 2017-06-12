@@ -90,8 +90,8 @@ def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), 
 		#				ADCvsfC.RemovePoint(p)
 		#		if ADCvsfC.GetX()[p] < 0:
 		#			 ADCvsfC.RemovePoint(p)
-				if i_range==0 and shuntMult==1.5:
-					ADCvsfC.RemovePoint(p)
+			#	if i_range==0 and shuntMult==1.5:
+			#		ADCvsfC.RemovePoint(p)
         			if ADCvsfC.GetY()[p] > MaxSaveValue:
             				maxPointNumber = p
         			if ADCvsfC.GetY()[p] > MinSaveValue:
