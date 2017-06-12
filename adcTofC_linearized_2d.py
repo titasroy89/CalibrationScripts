@@ -56,15 +56,8 @@ def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), 
 		graphs[ih] = []	
 		#print len(mean[1][14][1]),len(charge[1][14][:-1])
 		for i_capID in range(4):		
-		#	if ih ==14 and shuntMult==1.5 and i_capID==1 and i_range==0:
-		#		print "the root of all trouble mean:",len(mean[0][14][1])
-		#		print " the charge is :",len(_charge)
-		#		gr = TGraphErrors(len(mean[i_range][ih][i_capID]),_charge,mean[i_range][ih][i_capID],_chargeErr,rms[i_range][ih][i_capID])
-		#		gr.Draw('ap')
-		#		c1.SaveAs("trial_1.pdf")
                 	ADCvsfC=(TGraphErrors(len(mean[i_range][ih][i_capID]),_charge,mean[i_range][ih][i_capID],_chargeErr,rms[i_range][ih][i_capID]))
                 	ADCvsfC.SetNameTitle("LinADCvsfC_%i_%i_range_%i_shunt_%.1f_capID_%i"%(ih, channel,i_range,float(shuntMult),i_capID),"LinADCvsfC_%i_%i_range_%i_shunt_%.1f_capID_%i"%(ih, channel,i_range,float(shuntMult),i_capID))
-		#	print "LinADCvsfC_%i_%i_range_%i_shunt_%i_%i_capID_%i"%(ih, channel,i_range,int(shuntMult),int(shuntMult%1*10),i_capID)
 			points = range(ADCvsfC.GetN())
 			points.reverse()
 			MinSaveValue = linADC(i_range*64 + 2)[0]
