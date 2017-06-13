@@ -150,11 +150,21 @@ def QIECalibrationScan(options):
 
         simpleCardMap = fakesimpleCardMap
 
-        histoList = []
-        for link in linkMap:
-		histoList += [link*6,link*6+1,link*6+2,link*6+3,link*6+4,link*6+5]
+        if options.histoList == '-1':
+		histoList = range(144)
+        else:
+            histoList = eval(options.histoList)
 
-	histoList = [0,1,2,3,4,5]
+        if type(histoList)==type(int()):
+                histoList = [histoList]
+        histoList.sort()
+
+        linkMaphistoList = []
+        for link in linkMap:
+		linkMaphistoList += [link*6,link*6+1,link*6+2,link*6+3,link*6+4,link*6+5]
+
+	histoList = list(set(histoList).intersection(linkMaphistoList))
+
         print '-'*30
         print 'Histograms List'
         print '-'*30
@@ -412,6 +422,8 @@ if __name__ == "__main__":
                           help="Data file from previous data taking run to redo the fit on")
         parser.add_option("--saveGraph","--savegraph","--saveGraphs","--savegraphs",action="store_true",dest="saveGraphs",default=False,
                          help="Save Graphs")
+        parser.add_option("--histoList", dest="histoList",default="-1",type="str",
+                          help="List of histos to run on, default is -1, which will run all the histograms")
         (options, args) = parser.parse_args()
         print 'start'
         if not options.range == -1:
