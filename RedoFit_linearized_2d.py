@@ -163,16 +163,16 @@ def QIECalibrationScan(options):
         for link in linkMap:
 		linkMaphistoList += [link*6,link*6+1,link*6+2,link*6+3,link*6+4,link*6+5]
 
+	linkMaphistoList.sort()
+
 	histoList = list(set(histoList).intersection(linkMaphistoList))
+
+	histoList.sort()
 
         print '-'*30
         print 'Histograms List'
         print '-'*30
         print histoList
-
-    
-
-
 
 
         outputParamFile = open(outputDirectory+"calibrationParams.txt",'w')
@@ -271,7 +271,7 @@ def QIECalibrationScan(options):
                 output={}
                 print "Now on shuntMult %.1f"%shuntMult
                 shuntOutputDirectory = outputDirectory #+ "Data_%s_%s/"%(rangeMode, shuntMode)
-                vals, meanvals, rmsvals, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
+                vals, meanvals, rmsvals, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory, histoList=histoList)
                 print "this is:",outputDirectory
                 if shuntMult == 1:
 			qieRange= range(4)
@@ -281,6 +281,7 @@ def QIECalibrationScan(options):
                 for i_range in qieRange:
 # 			histoList =  vals[i_range].keys()
 # 			histoList.sort()
+			
 			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],meanvals, rmsvals, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
 
 
