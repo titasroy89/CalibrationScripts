@@ -4,7 +4,8 @@ import os
 from optparse import OptionParser
 import subprocess
 import sys
-from numpy import std
+import numpy
+#from numpy import std, mean
 from ROOT import *
 import re
 from array import array
@@ -26,7 +27,7 @@ from FitUncertaintyPlots import *
 slotDict = {1:[18,19,20,21,23,24,25,26],
             }
 
-shunt_Val ={1:0,
+shunt_GSel ={1:0,
             1.5:1,
             2:2,
             3:4,
@@ -39,7 +40,7 @@ shunt_Val ={1:0,
             10:28,
             11:30,
             11.5:31}        
-shuntMultList = shunt_Val.keys()
+shuntMultList = shunt_GSel.keys()
 shuntMultList.sort()
 Barcode_UID ={hex(0xead4b070):600028,
 	      hex(0xeabb9870):600549,
@@ -109,7 +110,7 @@ def getValuesFromFile(outputDir):
         return linkMap, injectionCardMap 
                 
 
-def ShuntScan(shuntMult=1, outputDirectory = '', linkMap={},injectionCardMap={}):
+def ShuntScan(shuntMult=1, outputDirectory = '', linkMap={},injectionCardMap={}, histoList = range(144)):
          files = os.listdir(outputDirectory)
 	 final_file = ''
 	 for f in files:
@@ -124,9 +125,9 @@ def ShuntScan(shuntMult=1, outputDirectory = '', linkMap={},injectionCardMap={})
 	 linkMap, injectionCardMap = getValuesFromFile(outputDirectory)
 
          linkMap, injectionCardMap = getValuesFromFile(outputDirectory)
-         val, mean, rms, charge= read_histo_2d(file_in=final_file,shuntMult=shuntMult,linkMap=linkMap, injectionCardMap=injectionCardMap)
+         val, meanvals, rmsvals, charge= read_histo_2d(file_in=final_file,shuntMult=shuntMult,linkMap=linkMap, injectionCardMap=injectionCardMap, histoList=histoList)
 	 
-         return val, mean, rms, charge
+         return val, meanvals, rmsvals, charge
 
 def QIECalibrationScan(options):
 
@@ -152,6 +153,8 @@ def QIECalibrationScan(options):
         histoList = []
         for link in linkMap:
 		histoList += [link*6,link*6+1,link*6+2,link*6+3,link*6+4,link*6+5]
+
+	histoList = [0,1,2,3,4,5]
         print '-'*30
         print 'Histograms List'
         print '-'*30
@@ -206,7 +209,7 @@ def QIECalibrationScan(options):
         if options.RunShunt:
                 print " Shunt Scans begin"
         if options.shuntList == '-1':
-            shuntMult_list = shunt_Val.keys()
+            shuntMult_list = shunt_GSel.keys()
         else:
             shuntMult_list = eval(options.shuntList)
 
@@ -222,9 +225,9 @@ def QIECalibrationScan(options):
         for shuntMult in shuntMult_list:
                 output={}
                 shuntOutputDirectory = outputDirectory #+ "Data_%s_%s/"%(rangeMode, shuntMode)
-                vals, mean, rms, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory, linkMap=linkMap,injectionCardMap=injectionCardMap)
+                vals, meanvals, rmsvals, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory, linkMap=linkMap,injectionCardMap=injectionCardMap, histoList=histoList)
 		
-		pedestal_graphs_shunt[shuntMult] = makeADCvsfCgraphSepCapID(vals[0],mean, rms, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=0,shuntMult=shuntMult)
+		pedestal_graphs_shunt[shuntMult] = makeADCvsfCgraphSepCapID(vals[0],meanvals, rmsvals, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=0,shuntMult=shuntMult)
 
 	dirStructure = outputDirectory.split('/')
 	for value in dirStructure:
@@ -238,18 +241,27 @@ def QIECalibrationScan(options):
 
 	pedestalVals = getPedestals(pedestal_graphs_shunt,shuntMult_list,histoList,outputDirectory, date, run)
 
+	print "-"*20
+	print "-"*20
+	print "PedestalValues"
+	print pedestalVals
+	print "-"*20
+	print "-"*20
+
 #	for ih in histoList:
 		#print pedestal_graphs_shunt[1.0][ih]
 		#print pedestalVals[ih]
-	high_slope=[]
+	unshunted_params=[]
 	shuntFactors={}
+
+
         for shuntMult in shuntMult_list:
 		shuntFactors[shuntMult]={}
                 graphs_shunt ={}
                 output={}
                 print "Now on shuntMult %.1f"%shuntMult
                 shuntOutputDirectory = outputDirectory #+ "Data_%s_%s/"%(rangeMode, shuntMode)
-                vals, mean, rms, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
+                vals, meanvals, rmsvals, charge = ShuntScan(shuntMult=shuntMult, outputDirectory=outputDirectory)
                 print "this is:",outputDirectory
                 if shuntMult == 1:
 			qieRange= range(4)
@@ -257,10 +269,11 @@ def QIECalibrationScan(options):
 			qieRange=range(2)
 
                 for i_range in qieRange:
-			histoList =  vals[i_range].keys()
-			histoList.sort()
-			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],mean, rms, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
-		shunts_method1 = [array('d') for i in range(12)]
+# 			histoList =  vals[i_range].keys()
+# 			histoList.sort()
+			graphs_shunt[i_range] = makeADCvsfCgraphSepCapID(vals[i_range],meanvals, rmsvals, charge, histoList,linkMap=linkMap,injectionCardMap=injectionCardMap,qieRange=i_range,shuntMult=shuntMult)
+
+
                 for ih in histoList:
 			
 			linkNum = int(ih/6)
@@ -268,23 +281,22 @@ def QIECalibrationScan(options):
 			
 			#print qieID
 			uID_barcode = linkMap[linkNum]['unique_ID'].split()[1]
-			#print uID_barcode
-			shuntFactors[shuntMult]
+
 			if uID_barcode not in BarcodeList:
 				barcode = 600000
-				for i in range(12):
-					for r in range(12):
-						shunts_method1[i].append(float(shuntMult))
+# 				for i in range(12):
+# 					for r in range(12):
+# 						shunts_method1[i].append(float(shuntMult))
 			else:
 				barcode = Barcode_UID[uID_barcode] 
 				
-				f1 = open("/Users/titasroy/cmshcal11_github/Method1_shuntfactors_%s.txt"%(uID_barcode)).readlines()
-                                for line in f1:
-                                        for i in range(12):
-                                		shunts_method1[i].append(float(line.split()[i]))
+# 				f1 = open("/Users/titasroy/cmshcal11_github/Method1_shuntfactors_%s.txt"%(uID_barcode)).readlines()
+#                                 for line in f1:
+#                                         for i in range(12):
+#                                 		shunts_method1[i].append(float(line.split()[i]))
 			
-				print len(shunts_method1)
-				print len(shunts_method1[0])
+# 				print len(shunts_method1)
+# 				print len(shunts_method1[0])
 			#sys.exit()
 
 			#print "Barcode is:",barcode
@@ -311,27 +323,41 @@ def QIECalibrationScan(options):
 				params_shunt, high_ranges =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestalVals = pedestalVals[ih])
 			else:
 				params_shunt, high_vals =  doFit_combined(graphList = graphList_shunt, saveGraph = options.saveGraphs, qieNumber = qieNum, qieUniqueID = qieID.replace(' ', '_'), useCalibrationMode = False, outputDir = outputDirectory, shuntMult=shuntMult, pedestalVals = pedestalVals[ih])
-			high_slopes=high_ranges
+
+
+			unshunted_params=high_ranges
+
 			uID = qieID.replace(' ', '_')
+
+
+			#Calculate the method1 shunt factor:
+			method1shunts = []
+			for i_range in range(2):
+				for i_capID in range(4):
+					#append the shunt factor (unshunted slope over shunted slope)
+					method1shunts.append(unshunted_params[i_range][i_capID][0]/params_shunt[i_range][i_capID][0])
+
+			method1ShuntFactor = numpy.mean(method1shunts)
+			method1ShuntFactorRMS = numpy.std(method1shunts)
+
 				
 			#for i_range in graphs_shunt:
 			for i_range in range(4):
 				for i_capID in range(4):
-					if (shuntMult==1 and( i_range==0 or i_range==1 or i_range==2 or i_range==3)) or i_range==0 or i_range==1:
+					if shuntMult==1 or (i_range in [0,1]):
 						print shuntMult, i_range
-						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_Val[shuntMult], (params_shunt[i_range][i_capID][0]),(params_shunt[i_range][i_capID][1]),(params_shunt[i_range][i_capID][2]))
+						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_GSel[shuntMult], (params_shunt[i_range][i_capID][0]),(params_shunt[i_range][i_capID][1]),(params_shunt[i_range][i_capID][2]))
 						cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?, ?)",values_shunt)
-					elif (shuntMult ==1.5 or shuntMult==2 or shuntMult==3 or shuntMult==4 or shuntMult==5 or shuntMult==6 or shuntMult==7 or shuntMult==8 or shuntMult==9 or shuntMult==10 or shuntMult==11) and (i_range==2 or i_range==3):
-						print shuntMult, i_range, qieNum, int(shuntMult)-1
-						print shunts_method1[int(shuntMult)-1][int(qieNum-1)]
-						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_Val[shuntMult], (high_slopes[i_capID][0])/shunts_method1[int(shuntMult)-1][qieNum-1],(high_slopes[i_capID][1])/shunts_method1[int(shuntMult)-1][qieNum-1],(high_slopes[i_capID][2])/shunts_method1[int(shuntMult)-1][qieNum-1])
-						cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?,?)",values_shunt)
-					if shuntMult==11.5 and (i_range==2 or i_range==3):
-						print shuntMult, i_range
-						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult,shunt_Val[shuntMult], (high_slopes[i_capID][0])/shunts_method1[11][qieNum-1],(high_slopes[i_capID][1])/shunts_method1[11][qieNum-1],(high_slopes[i_capID][2])/shunts_method1[11][qieNum-1])
-                                                cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?,?)",values_shunt)
+					elif ( (shuntMult in [1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 11.5]) and (i_range in [2,3]) ):
+						
+# 					        print shuntMult, i_range, qieNum, int(shuntMult)-1
+# 					        print shunts_method1[int(shuntMult)-1][int(qieNum-1)]
 
-					# print values_shunt
+
+						values_shunt = (qieID, barcode, qieNum, i_capID, i_range, shuntMult, shunt_GSel[shuntMult], (unshunted_params[i_range][i_capID][0]/method1ShuntFactor),(unshunted_params[i_range][i_capID][1]/method1ShuntFactor),(method1ShuntFactorRMS))
+
+						cursor[uID].execute("insert into qieshuntparams values (?,?,?, ?, ?, ?, ?, ?, ?,?)",values_shunt)
+
 					outputParamFile_shunt.write(str(values_shunt)+'\n')
          
         outputParamFile_shunt.close()

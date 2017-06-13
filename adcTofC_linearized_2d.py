@@ -1,4 +1,5 @@
 # Import tools
+
 from ROOT import *
 from math import sqrt
 import sys
@@ -27,6 +28,64 @@ nominalMapping = { 1 : 4,
                    }
 
 
+def cleanGraph(graph,i_range):
+
+    N = graph.GetN()
+    topPoints = range(int(N/2),N)
+    botPoints = range(int(N/2))
+    botPoints.reverse()
+
+#     points = range(graph.GetN())
+#     points.reverse()
+
+    MinSaveValue = linADC(i_range*64 + 2)[0]
+    MaxSaveValue = linADC(i_range*64 + 61)[0]
+
+    maxPointNumber = 999
+    minPointNumber = -1
+
+
+    #Identify the last point to keep
+    for p in topPoints:
+        if graph.GetY()[p] > MaxSaveValue:
+            maxPointNumber = p
+            break
+
+    #Identify the first point to keep
+    for p in botPoints:
+        if graph.GetY()[p] < MinSaveValue:
+            minPointNumber = p+1
+            break
+
+#     #Identify the first and last points to keep                                                                               
+#     for p in points:
+
+#         if graph.GetY()[p] > MaxSaveValue:
+#             maxPointNumber = p
+
+#         if graph.GetY()[p] > MinSaveValue:
+#             minPointNumber = p
+
+        
+    #remove everything after the last point                                                                                   
+    if maxPointNumber <999:
+        while (graph.GetN() > maxPointNumber):
+            graph.RemovePoint(maxPointNumber)
+
+    #remove the first N points, where N = minPointNumber                                                                      
+    if minPointNumber >-1:
+        for i in range(minPointNumber):
+            graph.RemovePoint(0)
+
+
+    if graph.GetN()==0:
+        print "Found a graph with no points!!!!"
+        print graph
+        print "Check the cleanup code!"
+        print "Exiting"
+        sys.exit()
+
+    return graph
 
 def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), linkMap = {}, injectionCardMap = {},qieRange=0,shuntMult=1):
 
@@ -58,51 +117,55 @@ def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), 
 		for i_capID in range(4):		
                 	ADCvsfC=(TGraphErrors(len(mean[i_range][ih][i_capID]),_charge,mean[i_range][ih][i_capID],_chargeErr,rms[i_range][ih][i_capID]))
                 	ADCvsfC.SetNameTitle("LinADCvsfC_%i_%i_range_%i_shunt_%.1f_capID_%i"%(ih, channel,i_range,float(shuntMult),i_capID),"LinADCvsfC_%i_%i_range_%i_shunt_%.1f_capID_%i"%(ih, channel,i_range,float(shuntMult),i_capID))
-			points = range(ADCvsfC.GetN())
-			points.reverse()
-			MinSaveValue = linADC(i_range*64 + 2)[0]
-    			MaxSaveValue = linADC(i_range*64 + 61)[0]
-			maxPointNumber = 999
-    			minPointNumber = -1
-			if shuntMult==1.5:
-                                 ADCvsfC.RemovePoint(points[0])
+
+
+                        ADCvsfC = cleanGraph(ADCvsfC, i_range)
+
+# 			points = range(ADCvsfC.GetN())
+# 			points.reverse()
+# 			MinSaveValue = linADC(i_range*64 + 2)[0]
+#     			MaxSaveValue = linADC(i_range*64 + 61)[0]
+# 			maxPointNumber = 999
+#     			minPointNumber = -1
+# 			if shuntMult==1.5:
+#                                  ADCvsfC.RemovePoint(points[0])
  			
-			ADCvsfC.RemovePoint(points[len(points)-1])
-			for p in points:
-				if i_range==0:
-				 	if (ADCvsfC.GetY()[p] < 1 or ADCvsfC.GetY()[p] >linADC(61)[0]):
-						 ADCvsfC.RemovePoint(p)
-				if i_range==1:
-					if (ADCvsfC.GetY()[p] < linADC(64)[0] or ADCvsfC.GetY()[p] >linADC(122)[0]):
-						 ADCvsfC.RemovePoint(p)
-				if i_range==2:
-					if (ADCvsfC.GetY()[p] < linADC(128)[0] or ADCvsfC.GetY()[p] >linADC(185)[0]):
-						ADCvsfC.RemovePoint(p)
-				if i_range==3:
-					if (ADCvsfC.GetY()[p] < linADC(192)[0] or ADCvsfC.GetY()[p] >linADC(249)[0]):
-						ADCvsfC.RemovePoint(p)
-				if ADCvsfC.GetX()[p] < 0:
-					 ADCvsfC.RemovePoint(p)
-			#	if i_range==0 and shuntMult==1.5:
-			#		ADCvsfC.RemovePoint(p)
-        		#	if ADCvsfC.GetY()[p] > MaxSaveValue:
-            		#		maxPointNumber = p
-        		#	if ADCvsfC.GetY()[p] > MinSaveValue:
-			#		minPointNumber = p
-			if i_range==0 :
-				for i in range(6):		
-					ADCvsfC.RemovePoint(0)
+# 			ADCvsfC.RemovePoint(points[len(points)-1])
+# 			for p in points:
+# 				if i_range==0:
+# 				 	if (ADCvsfC.GetY()[p] < 1 or ADCvsfC.GetY()[p] >linADC(61)[0]):
+# 						 ADCvsfC.RemovePoint(p)
+# 				if i_range==1:
+# 					if (ADCvsfC.GetY()[p] < linADC(64)[0] or ADCvsfC.GetY()[p] >linADC(122)[0]):
+# 						 ADCvsfC.RemovePoint(p)
+# 				if i_range==2:
+# 					if (ADCvsfC.GetY()[p] < linADC(128)[0] or ADCvsfC.GetY()[p] >linADC(185)[0]):
+# 						ADCvsfC.RemovePoint(p)
+# 				if i_range==3:
+# 					if (ADCvsfC.GetY()[p] < linADC(192)[0] or ADCvsfC.GetY()[p] >linADC(249)[0]):
+# 						ADCvsfC.RemovePoint(p)
+# 				if ADCvsfC.GetX()[p] < 0:
+# 					 ADCvsfC.RemovePoint(p)
+# 			#	if i_range==0 and shuntMult==1.5:
+# 			#		ADCvsfC.RemovePoint(p)
+#         		#	if ADCvsfC.GetY()[p] > MaxSaveValue:
+#             		#		maxPointNumber = p
+#         		#	if ADCvsfC.GetY()[p] > MinSaveValue:
+# 			#		minPointNumber = p
+# 			if i_range==0 :
+# 				for i in range(6):		
+# 					ADCvsfC.RemovePoint(0)
 
-    			#remove everything after the last point                                                                                   
-    		 #	if maxPointNumber < 999:
-        	#		while (ADCvsfC.GetN() > maxPointNumber):
-            	#			ADCvsfC.RemovePoint(maxPointNumber)
+#     			#remove everything after the last point                                                                                   
+#     		 #	if maxPointNumber < 999:
+#         	#		while (ADCvsfC.GetN() > maxPointNumber):
+#             	#			ADCvsfC.RemovePoint(maxPointNumber)
 
 
-    			#remove the first N points, where N = minPointNumber                                                                      
-		 #       if minPointNumber > -1:
-        	#		for i in range(minPointNumber):
-            	#			ADCvsfC.RemovePoint(0)
+#     			#remove the first N points, where N = minPointNumber                                                                      
+# 		 #       if minPointNumber > -1:
+#         	#		for i in range(minPointNumber):
+#             	#			ADCvsfC.RemovePoint(0)
 			
                 	graphs[ih].append(ADCvsfC)
          

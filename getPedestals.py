@@ -6,11 +6,11 @@ from array import array
 
 bin0startLevel = -0.5
 
-def CleanGraph(graph, i_range):
-    vOffset = i_range*64
-    points = range(graph.GetN())
+# def CleanGraph(graph, i_range):
+#     vOffset = i_range*64
+#     points = range(graph.GetN())
      
-    return graph
+#     return graph
 
 
 def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
@@ -38,8 +38,13 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
         lowCurrentPeds = []
         for i_capID in range(4):
             #remove lower and upper ends of ADC to make it clean
-            graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
+#            graph = CleanGraph(graphs_shunt[1.0][ih][i_capID],0)
+            graph = graphs_shunt[1.0][ih][i_capID]
 	    f1= TF1("f1","pol1",200,600);
+
+            print "pedestalFit"
+            print graph
+            print graph.GetN()
             graph.Fit("f1","R0")
             line = graph.GetFunction("f1")
             graph.Write()
@@ -56,7 +61,10 @@ def getPedestals(graphs_shunt, shuntMult_list, histoList,dirName, date, run):
             highCurrentShuntPeds[i_shunt]=[]
             for i_capID in range(4):
 		#print ih, i_shunt, i_capID
-                graph = CleanGraph(graphs_shunt[i_shunt][ih][i_capID],0)
+#                graph = CleanGraph(graphs_shunt[i_shunt][ih][i_capID],0)
+                graph = graphs_shunt[i_shunt][ih][i_capID]
+                print graph, i_shunt
+                print graph.GetN()
 	#	if i_shunt==1.5 and ih==14 and i_capID==1:
 	#		graph.Draw("ap")
 	#		c2.SaveAs("trial_2.pdf")		

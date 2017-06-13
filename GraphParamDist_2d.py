@@ -77,40 +77,44 @@ def graphParamDist(paramFileName):
             hists[shuntMult][qieRange][0].Fill(slope)
             hists[shuntMult][qieRange][1].Fill(offset)
             hists[shuntMult][qieRange][2].Fill(uncertainty)
-#        print slopes_[1][0][0]
-        file_1 = open("%s/Method1_R0_C0_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-	for index in range(12):
-    		file_1.write(str(slopes_[1][0][0][index]) + " " + str(slopes_[1.5][0][0][index]) +" " + str(slopes_[2][0][0][index]) + " " + str(slopes_[3][0][0][index]) +" " + str(slopes_[4][0][0][index]) + " " + str(slopes_[5][0][0][index]) +  " " + str(slopes_[6][0][0][index]) + " " + str(slopes_[7][0][0][index]) + " " + str(slopes_[8][0][0][index]) + " " + str(slopes_[9][0][0][index]) +" " + str(slopes_[10][0][0][index]) + " " + str(slopes_[11][0][0][index]) + " " + str(slopes_[11.5][0][0][index]) +"\n")
-	file_1.close()        
-        file_2 = open("%s/Method1_R0_C1_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_2.write(str(slopes_[1][1][0][index]) + " " + str(slopes_[1.5][1][0][index]) +" " + str(slopes_[2][1][0][index]) + " " + str(slopes_[3][1][0][index]) +" " + str(slopes_[4][1][0][index]) + " " + str(slopes_[5][1][0][index]) +  " " + str(slopes_[6][1][0][index]) + " " + str(slopes_[7][1][0][index]) + " " + str(slopes_[8][1][0][index]) + " " + str(slopes_[9][1][0][index]) +" " + str(slopes_[10][1][0][index]) + " " + str(slopes_[11][1][0][index]) + " " + str(slopes_[11.5][1][0][index]) +"\n")
-        file_2.close()
-        file_3 = open("%s/Method1_R0_C2_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_3.write(str(slopes_[1][2][0][index]) + " " + str(slopes_[1.5][2][0][index]) +" " + str(slopes_[2][2][0][index]) + " " + str(slopes_[3][2][0][index]) +" " + str(slopes_[4][2][0][index]) + " " + str(slopes_[5][2][0][index]) +  " " + str(slopes_[6][2][0][index]) + " " + str(slopes_[7][2][0][index]) + " " + str(slopes_[8][2][0][index]) + " " + str(slopes_[9][2][0][index]) +" " + str(slopes_[10][2][0][index]) + " " + str(slopes_[11][2][0][index]) + " " + str(slopes_[11.5][2][0][index]) +"\n")
-        file_3.close()
-        file_4 = open("%s/Method1_R0_C3_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_4.write(str(slopes_[1][3][0][index]) + " " + str(slopes_[1.5][3][0][index]) +" " + str(slopes_[2][3][0][index]) + " " + str(slopes_[3][3][0][index]) +" " + str(slopes_[4][3][0][index]) + " " + str(slopes_[5][3][0][index]) +  " " + str(slopes_[6][3][0][index]) + " " + str(slopes_[7][3][0][index]) + " " + str(slopes_[8][3][0][index]) + " " + str(slopes_[9][3][0][index]) +" " + str(slopes_[10][3][0][index]) + " " + str(slopes_[11][3][0][index]) + " " + str(slopes_[11.5][3][0][index]) +"\n")
-        file_4.close()
-	file_5 = open("%s/Method1_R1_C0_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_5.write(str(slopes_[1][0][1][index]) + " " + str(slopes_[1.5][0][1][index]) +" " + str(slopes_[2][0][1][index]) + " " + str(slopes_[3][0][1][index]) +" " + str(slopes_[4][0][1][index]) + " " + str(slopes_[5][0][1][index]) +  " " + str(slopes_[6][0][1][index]) + " " + str(slopes_[7][0][1][index]) + " " + str(slopes_[8][0][1][index]) + " " + str(slopes_[9][0][1][index]) +" " + str(slopes_[10][0][1][index]) + " " + str(slopes_[11][0][1][index]) + " " + str(slopes_[11.5][0][1][index]) +"\n")
-        file_5.close()   
-        file_6 = open("%s/Method1_R1_C1_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_6.write(str(slopes_[1][1][1][index]) + " " + str(slopes_[1.5][1][1][index]) +" " + str(slopes_[2][1][1][index]) + " " + str(slopes_[3][1][1][index]) +" " + str(slopes_[4][1][1][index]) + " " + str(slopes_[5][1][1][index]) +  " " + str(slopes_[6][1][1][index]) + " " + str(slopes_[7][1][1][index]) + " " + str(slopes_[8][1][1][index]) + " " + str(slopes_[9][1][1][index]) +" " + str(slopes_[10][1][1][index]) + " " + str(slopes_[11][1][1][index]) + " " + str(slopes_[11.5][1][1][index]) +"\n")
-        file_6.close() 
-        file_7 = open("%s/Method1_R1_C2_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_7.write(str(slopes_[1][2][1][index]) + " " + str(slopes_[1.5][2][1][index]) +" " + str(slopes_[2][2][1][index]) + " " + str(slopes_[3][2][1][index]) +" " + str(slopes_[4][2][1][index]) + " " + str(slopes_[5][2][1][index]) +  " " + str(slopes_[6][2][1][index]) + " " + str(slopes_[7][2][1][index]) + " " + str(slopes_[8][2][1][index]) + " " + str(slopes_[9][2][1][index]) +" " + str(slopes_[10][2][1][index]) + " " + str(slopes_[11][2][1][index]) + " " + str(slopes_[11.5][2][1][index]) +"\n")
-        file_7.close() 
 
-        file_8 = open("%s/Method1_R1_C3_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
-        for index in range(12):
-                file_8.write(str(slopes_[1][3][1][index]) + " " + str(slopes_[1.5][3][1][index]) +" " + str(slopes_[2][3][1][index]) + " " + str(slopes_[3][3][1][index]) +" " + str(slopes_[4][3][1][index]) + " " + str(slopes_[5][3][1][index]) +  " " + str(slopes_[6][3][1][index]) + " " + str(slopes_[7][3][1][index]) + " " + str(slopes_[8][3][1][index]) + " " + str(slopes_[9][3][1][index]) +" " + str(slopes_[10][3][1][index]) + " " + str(slopes_[11][3][1][index]) + " " + str(slopes_[11.5][3][1][index]) +"\n")
-        file_8.close() 
+
+
+
+# #        print slopes_[1][0][0]
+#         file_1 = open("%s/Method1_R0_C0_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+# 	for index in range(12):
+#     		file_1.write(str(slopes_[1][0][0][index]) + " " + str(slopes_[1.5][0][0][index]) +" " + str(slopes_[2][0][0][index]) + " " + str(slopes_[3][0][0][index]) +" " + str(slopes_[4][0][0][index]) + " " + str(slopes_[5][0][0][index]) +  " " + str(slopes_[6][0][0][index]) + " " + str(slopes_[7][0][0][index]) + " " + str(slopes_[8][0][0][index]) + " " + str(slopes_[9][0][0][index]) +" " + str(slopes_[10][0][0][index]) + " " + str(slopes_[11][0][0][index]) + " " + str(slopes_[11.5][0][0][index]) +"\n")
+# 	file_1.close()        
+#         file_2 = open("%s/Method1_R0_C1_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_2.write(str(slopes_[1][1][0][index]) + " " + str(slopes_[1.5][1][0][index]) +" " + str(slopes_[2][1][0][index]) + " " + str(slopes_[3][1][0][index]) +" " + str(slopes_[4][1][0][index]) + " " + str(slopes_[5][1][0][index]) +  " " + str(slopes_[6][1][0][index]) + " " + str(slopes_[7][1][0][index]) + " " + str(slopes_[8][1][0][index]) + " " + str(slopes_[9][1][0][index]) +" " + str(slopes_[10][1][0][index]) + " " + str(slopes_[11][1][0][index]) + " " + str(slopes_[11.5][1][0][index]) +"\n")
+#         file_2.close()
+#         file_3 = open("%s/Method1_R0_C2_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_3.write(str(slopes_[1][2][0][index]) + " " + str(slopes_[1.5][2][0][index]) +" " + str(slopes_[2][2][0][index]) + " " + str(slopes_[3][2][0][index]) +" " + str(slopes_[4][2][0][index]) + " " + str(slopes_[5][2][0][index]) +  " " + str(slopes_[6][2][0][index]) + " " + str(slopes_[7][2][0][index]) + " " + str(slopes_[8][2][0][index]) + " " + str(slopes_[9][2][0][index]) +" " + str(slopes_[10][2][0][index]) + " " + str(slopes_[11][2][0][index]) + " " + str(slopes_[11.5][2][0][index]) +"\n")
+#         file_3.close()
+#         file_4 = open("%s/Method1_R0_C3_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_4.write(str(slopes_[1][3][0][index]) + " " + str(slopes_[1.5][3][0][index]) +" " + str(slopes_[2][3][0][index]) + " " + str(slopes_[3][3][0][index]) +" " + str(slopes_[4][3][0][index]) + " " + str(slopes_[5][3][0][index]) +  " " + str(slopes_[6][3][0][index]) + " " + str(slopes_[7][3][0][index]) + " " + str(slopes_[8][3][0][index]) + " " + str(slopes_[9][3][0][index]) +" " + str(slopes_[10][3][0][index]) + " " + str(slopes_[11][3][0][index]) + " " + str(slopes_[11.5][3][0][index]) +"\n")
+#         file_4.close()
+# 	file_5 = open("%s/Method1_R1_C0_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_5.write(str(slopes_[1][0][1][index]) + " " + str(slopes_[1.5][0][1][index]) +" " + str(slopes_[2][0][1][index]) + " " + str(slopes_[3][0][1][index]) +" " + str(slopes_[4][0][1][index]) + " " + str(slopes_[5][0][1][index]) +  " " + str(slopes_[6][0][1][index]) + " " + str(slopes_[7][0][1][index]) + " " + str(slopes_[8][0][1][index]) + " " + str(slopes_[9][0][1][index]) +" " + str(slopes_[10][0][1][index]) + " " + str(slopes_[11][0][1][index]) + " " + str(slopes_[11.5][0][1][index]) +"\n")
+#         file_5.close()   
+#         file_6 = open("%s/Method1_R1_C1_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_6.write(str(slopes_[1][1][1][index]) + " " + str(slopes_[1.5][1][1][index]) +" " + str(slopes_[2][1][1][index]) + " " + str(slopes_[3][1][1][index]) +" " + str(slopes_[4][1][1][index]) + " " + str(slopes_[5][1][1][index]) +  " " + str(slopes_[6][1][1][index]) + " " + str(slopes_[7][1][1][index]) + " " + str(slopes_[8][1][1][index]) + " " + str(slopes_[9][1][1][index]) +" " + str(slopes_[10][1][1][index]) + " " + str(slopes_[11][1][1][index]) + " " + str(slopes_[11.5][1][1][index]) +"\n")
+#         file_6.close() 
+#         file_7 = open("%s/Method1_R1_C2_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_7.write(str(slopes_[1][2][1][index]) + " " + str(slopes_[1.5][2][1][index]) +" " + str(slopes_[2][2][1][index]) + " " + str(slopes_[3][2][1][index]) +" " + str(slopes_[4][2][1][index]) + " " + str(slopes_[5][2][1][index]) +  " " + str(slopes_[6][2][1][index]) + " " + str(slopes_[7][2][1][index]) + " " + str(slopes_[8][2][1][index]) + " " + str(slopes_[9][2][1][index]) +" " + str(slopes_[10][2][1][index]) + " " + str(slopes_[11][2][1][index]) + " " + str(slopes_[11.5][2][1][index]) +"\n")
+#         file_7.close() 
+
+#         file_8 = open("%s/Method1_R1_C3_%s.txt"%(outputDirectory, uniqueID.replace(" ","_")), "w")
+#         for index in range(12):
+#                 file_8.write(str(slopes_[1][3][1][index]) + " " + str(slopes_[1.5][3][1][index]) +" " + str(slopes_[2][3][1][index]) + " " + str(slopes_[3][3][1][index]) +" " + str(slopes_[4][3][1][index]) + " " + str(slopes_[5][3][1][index]) +  " " + str(slopes_[6][3][1][index]) + " " + str(slopes_[7][3][1][index]) + " " + str(slopes_[8][3][1][index]) + " " + str(slopes_[9][3][1][index]) +" " + str(slopes_[10][3][1][index]) + " " + str(slopes_[11][3][1][index]) + " " + str(slopes_[11.5][3][1][index]) +"\n")
+#         file_8.close() 
 
         outputParamRootFile = TFile("%s/fitResults_%s.root"%(outputDirectory, uniqueID.replace(" ","_")),"update")
 

@@ -26,7 +26,7 @@ shunt_Val ={1:0,
             11:30,
             11.5:31}
 
-def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardMap={}):
+def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardMap={},histoList = range(144)):
 	shuntVal = shunt_Val[shuntMult]
         result = {}
         tf = TFile(file_in, "READ")
@@ -66,17 +66,22 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
                 if shuntVal > 0 and i_qieRange==3: continue
                 results[i_qieRange] = {}
                 rangeADCoffset = i_qieRange*64.
-                for i_link in range(24):
+		for ih in histoList:
+#                for i_link in range(24):
                         goodLink = True
-                        for i_channel in range(6):
+#                        for i_channel in range(6):
+			if goodLink:
+
+				i_link = ih/6
+				i_channel = ih%6
+                                histNum = ih
+
                                 histName = "%s_f%i_c%i_r%i_s%i"%(histNameStart, i_link, i_channel, i_qieRange, shuntVal)
                                 hist = tf.Get(histName)
                                 if type(hist)==type(TObject()):
                                         goodLink = False
                                         break
 				histBins = hist.GetNbinsX()
-                                histNum = 6*i_link + i_channel
-				ih = 6*i_link + i_channel
 				channel = (ih % 12 + 1)
 				backplane_slotNum = linkMap[i_link]['slot']
 				

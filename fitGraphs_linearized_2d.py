@@ -123,8 +123,8 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                         else:
                                 outputTGraphs.cd("Shunted_LinadcVsCharge")
                         
-
-#			print pedestal
+			print "Pedestals Used"
+			print pedestal
 
                         if graph.GetN() > 1:
 				print "TOTAL:",graph.GetN()
@@ -291,21 +291,17 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         else:
 		ranges = range(2)        
         params = [[],[],[],[]]
-	
-	high_range=[ ]
-        #else:
-         #       ranges = range(2)
-          #      params = [[],[],[]]
+        unshunted_params = [[],[],[],[]]	
 
         for irange in ranges:
+
                 if fitLines[irange]==None:
                         for icapID in range(4):
                                 params[irange].append([-1,-1])
                         continue
                 for icapID in range(4):
-			if shuntMult==1:
-                                high_range.append([fitLines[0][icapID].GetParameter(1),fitLines[0][icapID].GetParameter(0),fitLines[0][icapID].GetParError(1)])
-                              #  high_range.append([fitLines[0][icapID].GetParameter(1),fitLines[0][icapID].GetParError(1),fitLines[0][icapID].GetParError(1)])
+# 			if shuntMult==1:
+#                                 high_range[irange].append([fitLines[0][icapID].GetParameter(1),fitLines[0][icapID].GetParameter(0),fitLines[0][icapID].GetParError(1)])
 
 			if irange==0 and shuntMult==1:
 				offset = -0.5
@@ -313,8 +309,11 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                         	offset = fitLines[irange][icapID].GetParameter(0)
                         slope = fitLines[irange][icapID].GetParameter(1)
                         uncertainty = fitLines[irange][icapID].GetParError(1)
+
                         params[irange].append([slope,offset,uncertainty])
-       
+			if shuntMult==1:
+				unshunted_params[irange].append([slope,offset,uncertainty])
+				
 		
        # print  high_range
 	#sys.exit()
@@ -390,7 +389,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                                 
                         c1.SaveAs(saveName)
 
-        return params, high_range
+        return params, unshunted_params
 
 
 
