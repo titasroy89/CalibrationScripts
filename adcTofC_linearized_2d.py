@@ -77,7 +77,9 @@ def cleanGraph(graph,i_range):
         for i in range(minPointNumber):
             graph.RemovePoint(0)
 
-
+    while graph.GetY()[0] > graph.GetY()[1]:
+        graph.RemovePoint(0)
+    
     if graph.GetN()==0:
         print "Found a graph with no points!!!!"
         print graph
@@ -99,11 +101,13 @@ def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), 
     if shuntMult == 1:
             qierange = range(4)
     else :
-            qierange = range(2)
+            qierange = range(2) #change
     if i_range > 0 or shuntMult>1:
         highCurrent = True
     else:
         highCurrent = False
+   # print "histoList:", histo_list[0]
+   # print "values:", values
     lsbList = values[histo_list[0]].keys()
     lsbList.sort()
     for ih in histo_list:
@@ -114,7 +118,8 @@ def makeADCvsfCgraphSepCapID(values,mean, rms, charge,histo_list = range(0,96), 
 		_chargeErr = array("d",[0 for i in range(len(charge[i_range][ih][:-1]))])
 		graphs[ih] = []	
 		#print len(mean[1][14][1]),len(charge[1][14][:-1])
-		for i_capID in range(4):		
+		for i_capID in range(4):	
+			#print "the hist is :", ih	
                 	ADCvsfC=(TGraphErrors(len(mean[i_range][ih][i_capID]),_charge,mean[i_range][ih][i_capID],_chargeErr,rms[i_range][ih][i_capID]))
                 	ADCvsfC.SetNameTitle("LinADCvsfC_%i_%i_range_%i_shunt_%.1f_capID_%i"%(ih, channel,i_range,float(shuntMult),i_capID),"LinADCvsfC_%i_%i_range_%i_shunt_%.1f_capID_%i"%(ih, channel,i_range,float(shuntMult),i_capID))
 

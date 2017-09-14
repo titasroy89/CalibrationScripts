@@ -32,7 +32,8 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
         tf = TFile(file_in, "READ")
 	rms={}
 	mean={}
-	conSlopes = lite.connect("Slopes_Offsets_new.db")        
+	conSlopes = lite.connect("Slopes_Offsets_Sept8.db")  
+	cursor = conSlopes.cursor()     
         histNameScheme = tf.GetListOfKeys()[9].GetName().split('_')
         histNameStart = histNameScheme[0]+'_'+histNameScheme[1]
 
@@ -45,7 +46,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 	if shuntMult == 1:
             qieRange = range(4)
     	else :
-            qieRange = range(2)
+            qieRange = range(2) #change
         for i_qieRange in qieRange:
 		if i_qieRange == 0 and shuntMult==1:
 			 highCurrent = False
@@ -63,7 +64,7 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 		histo_[i_qieRange]={}
 		histo_charge[i_qieRange]={}
 #		adcDist[i_qieRange]={}
-                if shuntVal > 0 and i_qieRange==3: continue
+                if shuntVal > 0 and i_qieRange==3: continue #change
                 results[i_qieRange] = {}
                 rangeADCoffset = i_qieRange*64.
 		for ih in histoList:
@@ -86,7 +87,8 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
 				backplane_slotNum = linkMap[i_link]['slot']
 				
 				if not backplane_slotNum in injectionCardMap:
-					 print 'backplane slot not mapped to charge injection card!!!'
+					 
+					 print 'backplane slot', backplane_slotNum, ' not mapped to charge injection card!!!'
 					 sys.exit()
 				injectioncard = injectionCardMap[backplane_slotNum][0]
 				dac = injectionCardMap[backplane_slotNum][1]
@@ -120,16 +122,18 @@ def read_histo_2d(file_in="trial.root",shuntMult = 1, linkMap={}, injectionCardM
                                                # info["mean"].append(hist.GetMean(2)-offset+rangeADCoffset)
                                                # info["rms"].append(max(hist.GetRMS(2), 0.01))
                                         results[i_qieRange][histNum][dacVal] = info
-				cursor = conSlopes.cursor()		
-				charge_=[]	
+				charge_=[]
+				query = ( injectioncard, int(dac), channel, int(highCurrent), dacvalue, dacvalue)
+                #                       print injectioncard, int(dac), channel, int(highCurrent), dacvalue, dacvalue
+				cursor.execute('SELECT offset, slope FROM CARDCAL WHERE card=? AND dac=? AND channel=? AND highcurrent=? AND rangelow<=? AND rangehigh>=?', query )
+				result_t = cursor.fetchone()
+
+				offset = result_t[0]
+				slope = result_t[1]
+	
 				for dacvalue in DACBins:
 					if dacvalue > 48000: continue
-					query = ( injectioncard, int(dac), channel, int(highCurrent), dacvalue, dacvalue)
-					cursor.execute('SELECT offset, slope FROM CARDCAL WHERE card=? AND dac=? AND channel=? AND highcurrent=? AND rangelow<=? AND rangehigh>=?', query )
-					result_t = cursor.fetchone()
 	
-					offset = result_t[0]
-					slope = result_t[1]
 
 					current = dacvalue*slope + offset
 					chargeq = current*25e6

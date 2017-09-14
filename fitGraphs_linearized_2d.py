@@ -69,7 +69,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         if shuntMult == 1: 
                 ranges = range(4)
         else :
-                ranges = range(2)
+                ranges = range(2) #change
         for i_range in ranges:
 
 	#choose the pedestal to subtract according to the whether it is low current or high current
@@ -289,7 +289,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
         if shuntMult == 1:
 	        ranges = range(4)
         else:
-		ranges = range(2)        
+		ranges = range(2)  #change       
         params = [[],[],[],[]]
         unshunted_params = [[],[],[],[]]	
 
@@ -326,7 +326,7 @@ def doFit_combined(graphList, saveGraph = False, qieNumber = 0, qieUniqueID = ""
                 ranges = range(4)
         else:
                 outputTGraphs.cd("Shunted_fitLines")
-                ranges = range(3)
+                ranges = range(3) #change
         for i_range in ranges:
                 if graphList[i_range]==None: continue
 #                print 'Writing'
